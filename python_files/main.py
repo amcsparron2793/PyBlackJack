@@ -21,6 +21,7 @@ class Deck:
         return self.deck
 
     def draw(self):
+        """Draw a card from the deck, make sure it is removed when it is drawn."""
         ...
 
 
