@@ -78,6 +78,7 @@ class Dealer(Player):
         print(f"{self.player_number}: {self.hand}")
 
     def should_stay(self):
+        # TODO: add some randomness
         if self.get_hand_value() >= 15:
             return True
         elif self.get_hand_value() <= 16:
