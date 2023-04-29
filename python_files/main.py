@@ -67,12 +67,16 @@ class Dealer(Player):
         print(f"{self.player_number}: {self.hidden_hand}")
 
     def hidden_hand_setup(self):
-        # FIXME: this needs to be fixed, when the cpu hits,
-        #  the new hand isn't SHOWN properly, it works, just a display issue
         self.hidden_hand = [x for x in self.hand]
         self.hidden_hand.pop(0)
         self.hidden_hand.insert(0, ('xxxx', 'xxxx'))
-        print(self.hand, self.hidden_hand)
+
+    def hidden_hand_update(self):
+        if len(self.hand) > len(self.hidden_hand):
+            self.hidden_hand.append(self.hand[-1])
+        else:
+            pass
+        return self.hidden_hand
 
     def reveal_hand(self):
         print(f"{self.player_number}: {self.hand}")
@@ -165,6 +169,7 @@ if __name__ == '__main__':
             game.stay(dealer)
         else:
             game.hit(dealer)
+            dealer.hidden_hand_update()
 
     print("FINALS:")
     player_one.print_hand()
