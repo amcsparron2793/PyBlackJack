@@ -46,7 +46,8 @@ class Deck(Cards):
 
     def draw(self):
         """Draw a card from the deck, make sure it is removed when it is drawn."""
-        print(f"{len(self.deck)} cards left to draw from.")
+        if len(self.deck) <= 15:
+            print(f"{len(self.deck)} cards left to draw from.")
         if len(self.deck) <= 0:
             raise EmptyShoeError("Deck has run out of cards")
         else:
@@ -249,7 +250,7 @@ class Game:
                     break
             print("---------------")
 
-            print(f"last moves were {self.dealer.last_move, self.player.last_move}")
+            # print(f"last moves were {self.dealer.last_move, self.player.last_move}")
             if self.dealer.should_stay():
                 self.stay(self.dealer)
             else:
