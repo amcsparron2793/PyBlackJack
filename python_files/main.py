@@ -213,7 +213,9 @@ class Game:
             # game.hit(player_one)
             self.player.print_hand()
             self.dealer.print_hand()
+
             self.player_turn()
+
             if ((self.dealer.last_move == 'stay'
                     and self.player.last_move == 'stay') or
                     (self.dealer.busted or self.player.busted)):
@@ -226,6 +228,7 @@ class Game:
                 else:
                     break
             print("---------------")
+
             print(f"last moves were {self.dealer.last_move, self.player.last_move}")
             if self.dealer.should_stay():
                 self.stay(self.dealer)
