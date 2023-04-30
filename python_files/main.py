@@ -7,12 +7,6 @@ import itertools
 import random
 from os import system
 
-# globals
-face_card_dict = {1: 'Ace',
-                  11: 'Jack',
-                  12: 'Queen',
-                  13: 'King'}
-
 
 # classes
 class EmptyShoeError(BaseException):
@@ -72,6 +66,22 @@ class Player:
         self.last_move = None
         self.busted = False
 
+    @staticmethod
+    def get_print_hand(hand):
+        p_hand = []
+        for x in hand:
+            if x[0] == 1:
+                p_hand.append(('Ace', x[1]))
+            elif x[0] == 11:
+                p_hand.append(('Jack', x[1]))
+            elif x[0] == 12:
+                p_hand.append(('Queen', x[1]))
+            elif x[0] == 13:
+                p_hand.append(('King', x[1]))
+            else:
+                p_hand.append(x)
+        return p_hand
+
     def set_player_number(self):
         if self.is_player:
             player_id = 1
@@ -80,7 +90,8 @@ class Player:
         return player_id
 
     def print_hand(self):
-        print(f"Player {self.player_number}: {self.hand}")
+        print_hand = self.get_print_hand(self.hand)
+        print(f"Player {self.player_number}: {print_hand}")
 
     def get_hand_value(self):
         value = []
@@ -89,6 +100,11 @@ class Player:
                 value.append(10)
             else:
                 value.append(c[0])
+            if 1 in value:
+                if sum(value) + 10 > 21:
+                    pass
+                else:
+                    value.append(10)
         return sum(value)
 
 
@@ -100,12 +116,8 @@ class Dealer(Player):
         self.hidden_hand = []
 
     def print_hand(self):
-        """for card in self.hidden_hand:
-            if card[0] in [1, 11, 12, 13]:
-                print(face_card_dict[card[0]])
-            else:
-                print(card)"""
-        print(f"{self.player_number}: {self.hidden_hand}")
+        print_hand = self.get_print_hand(self.hidden_hand)
+        print(f"{self.player_number}: {print_hand}")
 
     def hidden_hand_setup(self):
         self.hidden_hand = [x for x in self.hand]
@@ -120,7 +132,8 @@ class Dealer(Player):
         return self.hidden_hand
 
     def reveal_hand(self):
-        print(f"{self.player_number}: {self.hand}")
+        print_hand = self.get_print_hand(self.hand)
+        print(f"{self.player_number}: {print_hand}")
 
     def should_stay(self):
         if self.get_hand_value() >= 15:
