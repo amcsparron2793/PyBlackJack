@@ -131,11 +131,13 @@ class Game:
         return player
 
     def player_turn(self, player: Player):
-        choices = {1: 'hit',
-                   2: 'stay'}
-        # print(choices.items())
+        choices = {1: 'Hit',
+                   2: 'Stay'}
+
+        pretty_choices = [(x, y) for x, y in [x for x in choices.items()]]
         while True:
-            c = input(f"please make a choice {[(x, y) for x, y in choices.items()]}: ").lower()
+            c = input(f"Would you like to \n{pretty_choices[0][0]}. {pretty_choices[0][1]}"
+                      f"\n{pretty_choices[1][0]}. {pretty_choices[1][1]}\n: ").lower()
             if c == '1' or c == 'hit':
                 self.hit(player)
                 break
@@ -202,7 +204,11 @@ if __name__ == '__main__':
     player_one.hand = game.deal()
     dealer.hidden_hand_setup()
     #while True:
-    hand_loop()
+    try:
+        hand_loop()
+    except KeyboardInterrupt:
+        print("Ok Quitting")
+        exit(-1)
     #play_again = new_hand()
     #if play_again:
     #pass
