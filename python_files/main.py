@@ -6,9 +6,14 @@ import logging
 import itertools
 import random
 
+# globals
+face_card_dict = {1: 'Ace',
+                  11: 'Jack',
+                  12: 'Queen',
+                  13: 'King'}
+
 
 # classes
-
 class Cards:
     def __init__(self):
         self.suit = ['Spade', 'Heart', 'Diamond', 'Club']
@@ -64,6 +69,11 @@ class Dealer(Player):
         self.hidden_hand = []
 
     def print_hand(self):
+        """for card in self.hidden_hand:
+            if card[0] in [1, 11, 12, 13]:
+                print(face_card_dict[card[0]])
+            else:
+                print(card)"""
         print(f"{self.player_number}: {self.hidden_hand}")
 
     def hidden_hand_setup(self):
@@ -82,11 +92,12 @@ class Dealer(Player):
         print(f"{self.player_number}: {self.hand}")
 
     def should_stay(self):
-        # TODO: add some randomness
         if self.get_hand_value() >= 15:
-            return True
+            # this should be True without randomness
+            return bool(random.Random().randint(1, 100) % 2)
         elif self.get_hand_value() <= 16:
-            return False
+            # this should be False without randomness
+            return bool(random.Random().randint(1, 100) % 2)
         else:
             return True
 
@@ -113,7 +124,8 @@ class Game:
         player.last_move = 'hit'
         return player
 
-    def stay(self, player):
+    @staticmethod
+    def stay(player):
         print(f"Player: {player.player_number} Decided to stay!")
         player.last_move = 'stay'
         return player
@@ -122,13 +134,16 @@ class Game:
         choices = {1: 'hit',
                    2: 'stay'}
         # print(choices.items())
-        c = int(input(f"please make a choice {[(x,y) for x, y in choices.items()]}: "))
-        if c == 1:
-            self.hit(player)
-        elif c == 2:
-            self.stay(player)
-        else:
-            print("Please choose 1 or 2")
+        while True:
+            c = input(f"please make a choice {[(x, y) for x, y in choices.items()]}: ").lower()
+            if c == '1' or c == 'hit':
+                self.hit(player)
+                break
+            elif c == '2' or c == 'stay':
+                self.stay(player)
+                break
+            else:
+                print("Please choose hit or stay.")
 
     @staticmethod
     def is_bust(player: Player):
@@ -145,15 +160,7 @@ class Game:
             exit(0)
 
 
-if __name__ == '__main__':
-    game = Game()
-    dealer = Dealer()
-    player_one = Player()
-
-    dealer.hand = game.deal()
-    player_one.hand = game.deal()
-    dealer.hidden_hand_setup()
-
+def hand_loop():
     while True:
         # game.hit(player_one)
         player_one.print_hand()
@@ -170,14 +177,35 @@ if __name__ == '__main__':
         else:
             game.hit(dealer)
             dealer.hidden_hand_update()
-
-    print("FINALS:")
+    print("FINAL SCORE:")
     player_one.print_hand()
     dealer.reveal_hand()
     game.display_winner(player_one, dealer)
 
 
-    #while True:
-    #final_eval(player_hand=game.player.hand, dealer_hand=game.dealer.hand)
+def new_hand():
+    play_again = input("Play Another Hand? (y/n): ").lower()
+    if play_again == 'y':
+        return True
+    elif play_again == 'n':
+        return False
+    else:
+        return False
 
+
+if __name__ == '__main__':
+    game = Game()
+    dealer = Dealer()
+    player_one = Player()
+
+    dealer.hand = game.deal()
+    player_one.hand = game.deal()
+    dealer.hidden_hand_setup()
+    #while True:
+    hand_loop()
+    #play_again = new_hand()
+    #if play_again:
+    #pass
+    #else:
+    #break
 
