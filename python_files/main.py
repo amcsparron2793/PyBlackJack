@@ -23,14 +23,21 @@ class EmptyShoeError(BaseException):
 
 
 class Cards:
-    def __init__(self):
-        self.suit = ['Spade', 'Heart', 'Diamond', 'Club']
+    def __init__(self, use_unicode=True):
+        self.unicode_suits = ['\u2664', '\u2661', '\u2662', '\u2667']
+        self.plaintext_suits = ['Spade', 'Heart', 'Diamond', 'Club']
+
+        if use_unicode:
+            self.suit = self.unicode_suits
+        else:
+            self.suit = self.plaintext_suits
+
         self.value = range(1, 14)
 
 
 class Deck(Cards):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.deck = list(itertools.product(self.value, self.suit))
 
     def shuffle_deck(self):
