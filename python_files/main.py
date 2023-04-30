@@ -179,10 +179,7 @@ def hand_loop():
         else:
             game.hit(dealer)
             dealer.hidden_hand_update()
-    print("FINAL SCORE:")
-    player_one.print_hand()
-    dealer.reveal_hand()
-    game.display_winner(player_one, dealer)
+    end_hand()
 
 
 def new_hand():
@@ -195,20 +192,32 @@ def new_hand():
         return False
 
 
+def end_hand():
+    print("FINAL SCORE:")
+    player_one.print_hand()
+    dealer.reveal_hand()
+    game.display_winner(player_one, dealer)
+
+
 if __name__ == '__main__':
     game = Game()
     dealer = Dealer()
     player_one = Player()
 
-    dealer.hand = game.deal()
-    player_one.hand = game.deal()
-    dealer.hidden_hand_setup()
-    #while True:
-    try:
-        hand_loop()
-    except KeyboardInterrupt:
-        print("Ok Quitting")
-        exit(-1)
+    while True:
+        dealer.hand = game.deal()
+        player_one.hand = game.deal()
+        dealer.hidden_hand_setup()
+        #while True:
+        try:
+            hand_loop()
+        except KeyboardInterrupt:
+            print("Ok Quitting")
+            exit(-1)
+        if new_hand():
+            pass
+        else:
+            break
     #play_again = new_hand()
     #if play_again:
     #pass
