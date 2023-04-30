@@ -5,6 +5,7 @@ PyBlackJack
 import logging
 import itertools
 import random
+from os import system
 
 # globals
 face_card_dict = {1: 'Ace',
@@ -14,6 +15,19 @@ face_card_dict = {1: 'Ace',
 
 
 # classes
+class EmptyShoeError(BaseException):
+    def __init__(self, *args):
+        super().__init__(*args)
+
+    def with_traceback(self, tb):
+        """
+        Exception.with_traceback(tb) --
+            set self.__traceback__ to tb and return self.
+        """
+        self.__traceback__ = tb
+        return self
+
+
 class Cards:
     def __init__(self):
         self.suit = ['Spade', 'Heart', 'Diamond', 'Club']
@@ -31,7 +45,23 @@ class Deck(Cards):
 
     def draw(self):
         """Draw a card from the deck, make sure it is removed when it is drawn."""
-        return self.deck.pop(0)
+        print(f"{len(self.deck)} cards left to draw from.")
+        if len(self.deck) <= 0:
+            raise EmptyShoeError("Deck has run out of cards")
+        else:
+            return self.deck.pop(0)
+
+    def reload_deck(self):
+        while True:
+            r = input("Would you like to reload the deck? (y/n): ").lower()
+            if r == 'y':
+                self.__init__()
+                self.shuffle_deck()
+                return self.deck
+            elif r == 'n':
+                raise EmptyShoeError("Deck has run out of cards")
+            else:
+                pass
 
 
 class Player:
@@ -40,7 +70,7 @@ class Player:
         self.is_player = True
         self.player_number = self.set_player_number()
         self.last_move = None
-        self.has_bust = False
+        self.busted = False
 
     def set_player_number(self):
         if self.is_player:
@@ -125,7 +155,7 @@ class Game:
         print(f"Player: {player.player_number} Decided to hit!")
         player.hand.append(self.game_deck.draw())
         self.check_bust(player)
-        if player.has_bust:
+        if player.busted:
             if self.new_hand():
                 self.setup_new_hand()
                 return player
@@ -160,14 +190,14 @@ class Game:
     @staticmethod
     def is_bust(player: Player):
         print(f"Player {player.player_number} Busted! Game over.")
-        player.has_bust = True
+        player.busted = True
         return player
 
     def display_winner(self):
-        if self.player.has_bust or self.player.get_hand_value() < self.dealer.get_hand_value():
+        if self.player.busted or self.player.get_hand_value() < self.dealer.get_hand_value():
             print(f"{self.dealer.set_player_number()} Wins!!!!!!!!")
 
-        elif self.dealer.has_bust or self.player.get_hand_value() > self.dealer.get_hand_value():
+        elif self.dealer.busted or self.player.get_hand_value() > self.dealer.get_hand_value():
             print(f"Player {self.player.set_player_number()} Wins!!!!!!!")
 
     def setup_new_hand(self):
@@ -178,6 +208,7 @@ class Game:
         self.dealer.hidden_hand_setup()
 
     def hand_loop(self):
+        self.setup_new_hand()
         while True:
             # game.hit(player_one)
             self.player.print_hand()
@@ -185,7 +216,7 @@ class Game:
             self.player_turn()
             if ((self.dealer.last_move == 'stay'
                     and self.player.last_move == 'stay') or
-                    (self.dealer.has_bust or self.player.has_bust)):
+                    (self.dealer.busted or self.player.busted)):
                 print("---------------")
                 self.end_hand()
                 new = self.new_hand()
@@ -210,8 +241,9 @@ class Game:
 
     def new_hand(self):
         while True:
-            play_again = input("Play Another Hand? (y/n): ").lower()
+            play_again = input("\nPlay Another Hand? (y/n): ").lower()
             if play_again == 'y':
+                system('cls')
                 return True
             elif play_again == 'n':
                 return False
@@ -221,10 +253,6 @@ class Game:
 
 if __name__ == '__main__':
     game = Game()
-
-    game.dealer.hand = game.deal()
-    game.player.hand = game.deal()
-    game.dealer.hidden_hand_setup()
     try:
         game.hand_loop()
     except KeyboardInterrupt:
