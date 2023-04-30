@@ -40,6 +40,7 @@ class Player:
         self.is_player = True
         self.player_number = self.set_player_number()
         self.last_move = None
+        self.has_bust = False
 
     def set_player_number(self):
         if self.is_player:
@@ -106,6 +107,8 @@ class Game:
     def __init__(self):
         self.game_deck = Deck()
         self.game_deck.shuffle_deck()
+        self.player = Player()
+        self.dealer = Dealer()
 
     def deal(self):
         hand = [self.game_deck.draw(), self.game_deck.draw()]
@@ -114,6 +117,7 @@ class Game:
     def check_bust(self, player: Player):
         if player.get_hand_value() > 21:
             self.is_bust(player)
+            return player
         else:
             return player
 
@@ -121,6 +125,12 @@ class Game:
         print(f"Player: {player.player_number} Decided to hit!")
         player.hand.append(self.game_deck.draw())
         self.check_bust(player)
+        if player.has_bust:
+            if self.new_hand():
+                self.setup_new_hand()
+                return player
+            else:
+                exit(0)
         player.last_move = 'hit'
         return player
 
@@ -130,7 +140,7 @@ class Game:
         player.last_move = 'stay'
         return player
 
-    def player_turn(self, player: Player):
+    def player_turn(self):
         choices = {1: 'Hit',
                    2: 'Stay'}
 
@@ -139,10 +149,10 @@ class Game:
             c = input(f"Would you like to \n{pretty_choices[0][0]}. {pretty_choices[0][1]}"
                       f"\n{pretty_choices[1][0]}. {pretty_choices[1][1]}\n: ").lower()
             if c == '1' or c == 'hit':
-                self.hit(player)
+                self.hit(self.player)
                 break
             elif c == '2' or c == 'stay':
-                self.stay(player)
+                self.stay(self.player)
                 break
             else:
                 print("Please choose hit or stay.")
@@ -150,77 +160,73 @@ class Game:
     @staticmethod
     def is_bust(player: Player):
         print(f"Player {player.player_number} Busted! Game over.")
-        exit(0)
+        player.has_bust = True
+        return player
 
-    @staticmethod
-    def display_winner(player: Player, cpu: Dealer):
-        if player.get_hand_value() < cpu.get_hand_value():
-            print(f"{cpu.set_player_number()} Wins!!!!!!!!")
-            exit(0)
-        else:
-            print(f"Player {player.set_player_number()} Wins!!!!!!!")
-            exit(0)
+    def display_winner(self):
+        if self.player.has_bust or self.player.get_hand_value() < self.dealer.get_hand_value():
+            print(f"{self.dealer.set_player_number()} Wins!!!!!!!!")
 
+        elif self.dealer.has_bust or self.player.get_hand_value() > self.dealer.get_hand_value():
+            print(f"Player {self.player.set_player_number()} Wins!!!!!!!")
 
-def hand_loop():
-    while True:
-        # game.hit(player_one)
-        player_one.print_hand()
-        dealer.print_hand()
-        game.player_turn(player_one)
-        if (dealer.last_move == 'stay'
-                and player_one.last_move == 'stay'):
+    def setup_new_hand(self):
+        self.player.__init__()
+        self.player.hand = game.deal()
+        self.dealer.__init__()
+        self.dealer.hand = game.deal()
+        self.dealer.hidden_hand_setup()
+
+    def hand_loop(self):
+        while True:
+            # game.hit(player_one)
+            self.player.print_hand()
+            self.dealer.print_hand()
+            self.player_turn()
+            if ((self.dealer.last_move == 'stay'
+                    and self.player.last_move == 'stay') or
+                    (self.dealer.has_bust or self.player.has_bust)):
+                print("---------------")
+                self.end_hand()
+                new = self.new_hand()
+                if new:
+                    self.setup_new_hand()
+                    continue
+                else:
+                    break
             print("---------------")
-            break
-        print("---------------")
-        print(f"last moves were {dealer.last_move, player_one.last_move}")
-        if dealer.should_stay():
-            game.stay(dealer)
-        else:
-            game.hit(dealer)
-            dealer.hidden_hand_update()
-    end_hand()
+            print(f"last moves were {self.dealer.last_move, self.player.last_move}")
+            if self.dealer.should_stay():
+                self.stay(self.dealer)
+            else:
+                self.hit(self.dealer)
+                self.dealer.hidden_hand_update()
 
+    def end_hand(self):
+        print("FINAL SCORE:")
+        self.player.print_hand()
+        self.dealer.reveal_hand()
+        self.display_winner()
 
-def new_hand():
-    play_again = input("Play Another Hand? (y/n): ").lower()
-    if play_again == 'y':
-        return True
-    elif play_again == 'n':
-        return False
-    else:
-        return False
-
-
-def end_hand():
-    print("FINAL SCORE:")
-    player_one.print_hand()
-    dealer.reveal_hand()
-    game.display_winner(player_one, dealer)
+    def new_hand(self):
+        while True:
+            play_again = input("Play Another Hand? (y/n): ").lower()
+            if play_again == 'y':
+                return True
+            elif play_again == 'n':
+                return False
+            else:
+                pass
 
 
 if __name__ == '__main__':
     game = Game()
-    dealer = Dealer()
-    player_one = Player()
 
-    while True:
-        dealer.hand = game.deal()
-        player_one.hand = game.deal()
-        dealer.hidden_hand_setup()
-        #while True:
-        try:
-            hand_loop()
-        except KeyboardInterrupt:
-            print("Ok Quitting")
-            exit(-1)
-        if new_hand():
-            pass
-        else:
-            break
-    #play_again = new_hand()
-    #if play_again:
-    #pass
-    #else:
-    #break
-
+    game.dealer.hand = game.deal()
+    game.player.hand = game.deal()
+    game.dealer.hidden_hand_setup()
+    try:
+        game.hand_loop()
+    except KeyboardInterrupt:
+        print("Ok Quitting")
+        exit(-1)
