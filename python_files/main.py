@@ -263,7 +263,8 @@ class Game:
         self.dealer.reveal_hand()
         self.display_winner()
 
-    def new_hand(self):
+    @staticmethod
+    def new_hand():
         while True:
             play_again = input("\nPlay Another Hand? (y/n): ").lower()
             if play_again == 'y':
