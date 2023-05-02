@@ -154,6 +154,13 @@ class Dealer(Player):
             return True
 
 
+# TODO: should there be a separate class? or make this a property of the player?
+class Cage:
+    def __init__(self):
+        self.starting_chips = 500
+        self.chip_values = [5, 15, 25, 50]
+
+
 class Game:
     def __init__(self):
         self.game_deck = Deck()
