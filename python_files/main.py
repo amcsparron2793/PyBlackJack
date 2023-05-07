@@ -73,6 +73,11 @@ class Player:
         self.player_number = self.set_player_number()
         self.last_move = None
         self.busted = False
+        self.bet_amount: int = 0
+
+        # TODO: set this up so chips arent reset between hands
+        self.chips = None
+
 
     @staticmethod
     def get_print_hand(hand):
@@ -157,14 +162,28 @@ class Dealer(Player):
 # TODO: should there be a separate class? or make this a property of the player?
 class Cage:
     def __init__(self):
-        self.starting_chips = 500
+        self.starting_chips = 250
         self.chip_values = [5, 15, 25, 50]
+        self.hand_value: int = 0
+
+    def pay_in(self, player: Player):
+        player.chips = self.starting_chips
+        return player
+
+    def take_bet(self, player: Player):
+        if 0 < player.bet_amount <= player.chips:
+            self.hand_value += player.bet_amount
+            player.chips -= player.bet_amount
+            return player
+        else:
+            raise ValueError("bet amount cannot exceed players available chips or be zero.")
 
 
 class Game:
     def __init__(self):
         self.game_deck = Deck()
         self.game_deck.shuffle_deck()
+        self.banker = Cage()
         self.player = Player()
         self.dealer = Dealer()
 
@@ -245,7 +264,7 @@ class Game:
             self.player_turn()
 
             if ((self.dealer.last_move == 'stay'
-                    and self.player.last_move == 'stay') or
+                 and self.player.last_move == 'stay') or
                     (self.dealer.busted or self.player.busted)):
                 print("---------------")
                 self.end_hand()
