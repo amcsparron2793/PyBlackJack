@@ -176,7 +176,7 @@ class Cage:
             player.chips -= player.bet_amount
             return player
         else:
-            raise ValueError("bet amount cannot exceed players available chips or be zero.")
+            raise ValueError("Bet amount cannot exceed players available chips, or be zero.")
 
 
 class Game:
@@ -260,6 +260,10 @@ class Game:
             # game.hit(player_one)
             self.player.print_hand()
             self.dealer.print_hand()
+            self.banker.pay_in(self.player)
+            # TODO: figure out how to make this work for dealer also
+            # FIXME: this should only run once per hand
+            self.bet_question(self.player)
 
             self.player_turn()
 
@@ -300,6 +304,20 @@ class Game:
                 return False
             else:
                 pass
+
+    def bet_question(self, player: Player):
+        while True:
+            bet_amount = input(f"How much would you like to bet? (${player.chips} available): ")
+            if bet_amount.isnumeric():
+                bet_amount = int(bet_amount)
+                break
+            else:
+                print("Bet amount must be an integer.")
+
+        player.bet_amount = bet_amount
+        player = self.banker.take_bet(player)
+        # TODO:
+        return player
 
 
 if __name__ == '__main__':
