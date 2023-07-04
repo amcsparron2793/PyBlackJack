@@ -2,6 +2,7 @@
 """
 PyBlackJack
 """
+
 import logging
 import itertools
 import random
@@ -74,6 +75,7 @@ class Player:
         self.last_move = None
         self.busted = False
         self.bet_amount: int = 0
+        self.has_bet = False
 
         # TODO: set this up so chips arent reset between hands
         self.chips = None
@@ -261,9 +263,13 @@ class Game:
             self.player.print_hand()
             self.dealer.print_hand()
             self.banker.pay_in(self.player)
-            # TODO: figure out how to make this work for dealer also
-            # FIXME: this should only run once per hand
-            self.bet_question(self.player)
+            # TODO: figure out how to make betting work for dealer also
+            # FIXME: money is not added/subtracted from player totals - or at least not displayed correctly
+            if not self.player.has_bet:  # and not self.dealer.has_bet
+                self.bet_question(self.player)
+                self.player.has_bet = True
+            else:
+                pass
 
             self.player_turn()
 
