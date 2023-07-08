@@ -77,10 +77,6 @@ class Player:
         self.bet_amount: int = 0
         self.has_bet = False
 
-        # TODO: set this up so chips arent reset between hands
-        self.chips = None
-
-
     @staticmethod
     def get_print_hand(hand):
         p_hand = []
@@ -161,7 +157,6 @@ class Dealer(Player):
             return True
 
 
-# TODO: should there be a separate class? or make this a property of the player?
 class Cage:
     def __init__(self):
         self.starting_chips = 250
@@ -180,6 +175,12 @@ class Cage:
         else:
             raise ValueError("Bet amount cannot exceed players available chips, or be zero.")
 
+    def award_hand_value(self, player: Player):
+        player.chips += (self.hand_value * 2)
+        print(player.chips)
+        self.hand_value = 0
+        return player
+
 
 class Game:
     def __init__(self):
@@ -188,6 +189,9 @@ class Game:
         self.banker = Cage()
         self.player = Player()
         self.dealer = Dealer()
+        # initialize player chips and dealer chips
+        self.banker.pay_in(self.player)
+        self.banker.pay_in(self.dealer)
 
     def deal(self):
         hand = [self.game_deck.draw(), self.game_deck.draw()]
@@ -236,18 +240,20 @@ class Game:
             else:
                 print("Please choose hit or stay.")
 
-    @staticmethod
-    def is_bust(player: Player):
+    def is_bust(self, player: Player):
         print(f"Player {player.player_number} Busted! Game over.")
         player.busted = True
+        self.display_winner()
         return player
 
     def display_winner(self):
         if self.player.busted or self.player.get_hand_value() < self.dealer.get_hand_value():
             print(f"{self.dealer.set_player_number()} Wins!!!!!!!!")
+            self.banker.award_hand_value(self.dealer)
 
         elif self.dealer.busted or self.player.get_hand_value() > self.dealer.get_hand_value():
             print(f"Player {self.player.set_player_number()} Wins!!!!!!!")
+            self.banker.award_hand_value(self.player)
 
     def setup_new_hand(self):
         self.player.__init__()
@@ -257,14 +263,13 @@ class Game:
         self.dealer.hidden_hand_setup()
 
     def hand_loop(self):
+        # FIXME: $0 left to bet should be an automatic failure
         self.setup_new_hand()
         while True:
             # game.hit(player_one)
             self.player.print_hand()
             self.dealer.print_hand()
-            self.banker.pay_in(self.player)
             # TODO: figure out how to make betting work for dealer also
-            # FIXME: money is not added/subtracted from player totals - or at least not displayed correctly
             if not self.player.has_bet:  # and not self.dealer.has_bet
                 self.bet_question(self.player)
                 self.player.has_bet = True
@@ -322,7 +327,6 @@ class Game:
 
         player.bet_amount = bet_amount
         player = self.banker.take_bet(player)
-        # TODO:
         return player
 
 
