@@ -24,13 +24,21 @@ class EmptyShoeError(BaseException):
 
 
 class Cards:
-    def __init__(self, use_unicode=True):
+    def __init__(self, use_unicode=True, card_back: str = None):
+        self.card_back = card_back
+
         self.unicode_suits = ['\u2664', '\u2661', '\u2662', '\u2667']
         self.plaintext_suits = ['Spade', 'Heart', 'Diamond', 'Club']
 
         if use_unicode:
+            if self.card_back is None:
+                # three leading zeros made this code work
+                self.card_back = '\U0001F0A0'
+            else:
+                self.card_back = self.card_back
             self.suit = self.unicode_suits
         else:
+            self.card_back = 'xxxx'
             self.suit = self.plaintext_suits
 
         self.value = range(1, 14)
@@ -99,6 +107,7 @@ class Player:
         return p_hand
 
     def set_player_number(self):
+        # TODO: change this to player name and use it as part of db tracking of available cash etc
         if self.is_player:
             player_id = 1
         else:
@@ -138,8 +147,7 @@ class Dealer(Player):
     def hidden_hand_setup(self):
         self.hidden_hand = [x for x in self.hand]
         self.hidden_hand.pop(0)
-        # TODO: move hidden hand chars to Deck class?
-        self.hidden_hand.insert(0, ('xxxx', 'xxxx'))
+        self.hidden_hand.insert(0, game.game_deck.card_back)
 
     def hidden_hand_update(self):
         if len(self.hand) > len(self.hidden_hand):
