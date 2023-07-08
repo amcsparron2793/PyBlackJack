@@ -77,6 +77,11 @@ class Player:
         self.bet_amount: int = 0
         self.has_bet = False
 
+    def bankrupt(self):
+        print(f"Player {self.player_number} is bankrupt! goodbye!")
+        system("pause")
+        exit(0)
+
     @staticmethod
     def get_print_hand(hand):
         p_hand = []
@@ -133,6 +138,7 @@ class Dealer(Player):
     def hidden_hand_setup(self):
         self.hidden_hand = [x for x in self.hand]
         self.hidden_hand.pop(0)
+        # TODO: move hidden hand chars to Deck class?
         self.hidden_hand.insert(0, ('xxxx', 'xxxx'))
 
     def hidden_hand_update(self):
@@ -168,6 +174,8 @@ class Cage:
         return player
 
     def take_bet(self, player: Player):
+        if player.chips <= 0:
+            player.bankrupt()
         if 0 < player.bet_amount <= player.chips:
             self.hand_value += player.bet_amount
             player.chips -= player.bet_amount
@@ -177,7 +185,6 @@ class Cage:
 
     def award_hand_value(self, player: Player):
         player.chips += (self.hand_value * 2)
-        print(player.chips)
         self.hand_value = 0
         return player
 
@@ -247,11 +254,19 @@ class Game:
         return player
 
     def display_winner(self):
-        if self.player.busted or self.player.get_hand_value() < self.dealer.get_hand_value():
+        if self.player.busted:
             print(f"{self.dealer.set_player_number()} Wins!!!!!!!!")
             self.banker.award_hand_value(self.dealer)
 
-        elif self.dealer.busted or self.player.get_hand_value() > self.dealer.get_hand_value():
+        elif self.dealer.busted:
+            print(f"Player {self.player.set_player_number()} Wins!!!!!!!")
+            self.banker.award_hand_value(self.player)
+
+        elif self.player.get_hand_value() < self.dealer.get_hand_value():
+            print(f"{self.dealer.set_player_number()} Wins!!!!!!!!")
+            self.banker.award_hand_value(self.dealer)
+
+        elif self.player.get_hand_value() > self.dealer.get_hand_value():
             print(f"Player {self.player.set_player_number()} Wins!!!!!!!")
             self.banker.award_hand_value(self.player)
 
@@ -263,7 +278,6 @@ class Game:
         self.dealer.hidden_hand_setup()
 
     def hand_loop(self):
-        # FIXME: $0 left to bet should be an automatic failure
         self.setup_new_hand()
         while True:
             # game.hit(player_one)
@@ -317,6 +331,10 @@ class Game:
                 pass
 
     def bet_question(self, player: Player):
+        if player.chips <= 0:
+            player.bankrupt()
+        else:
+            pass
         while True:
             bet_amount = input(f"How much would you like to bet? (${player.chips} available): ")
             if bet_amount.isnumeric():
