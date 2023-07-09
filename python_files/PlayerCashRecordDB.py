@@ -69,8 +69,31 @@ def GetSQLliteConn(SQLlite_db_path=db_path):
     return conn
 
 
-def PlayerInfoLookup():
-    ...
+def PlayerInfoLookup(conn: sqlite3.Connection, **kwargs):
+    sql_query_text = None
+    if ('player_first_name' in kwargs
+            and 'player_last_name' in kwargs
+            and 'player_id' in kwargs):
+        raise AttributeError('please only enter a name OR a player_id')
+    elif ('player_first_name' in kwargs
+          and 'player_last_name' in kwargs):
+        p_first = kwargs['player_first_name']
+        p_last = kwargs['player_last_name']
+        where_text = (p_first + ' ' + p_last)
+        sql_query_text = f"select id from Players where player_full_name = '{where_text}'"
+    elif 'player_id' in kwargs:
+        p_id = kwargs['player_id']
+        where_text = int(p_id)
+        sql_query_text = f"select id from Players where id = {where_text}"
+
+    cursor = conn.cursor()
+    cursor.execute(sql_query_text)
+    res = cursor.fetchone()
+
+    if res is None:
+        print('No matching Players found')
+    else:
+        print(res[0])
 
 
 def NewPlayerSetup(cxn: sqlite3.Connection,
@@ -114,4 +137,7 @@ if __name__ == "__main__":
     main_logger.FinalInit()
 
     cn = GetSQLliteConn()
-    NewPlayerSetup(cn, {'fname': '\'Default\'', 'lname': '\'Player\''}, logger=main_logger)
+    #NewPlayerSetup(cn, {'fname': '\'Default\'', 'lname': '\'Player\''}, logger=main_logger)
+    player_name_dict = {'player_first_name': 'Andrew', 'player_last_name': 'McSparron'}
+    player_id_dict = {'player_id': 1}
+    PlayerInfoLookup(cn, **player_name_dict)# **player_id_dict)

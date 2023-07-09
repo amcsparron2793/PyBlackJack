@@ -3,7 +3,6 @@
 PyBlackJack
 """
 
-import logging
 import itertools
 import random
 from os import system
