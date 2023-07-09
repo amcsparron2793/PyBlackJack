@@ -1,11 +1,30 @@
-import os
+import ConfigFunctions as cf
 import sqlite3
+from os import remove
 from os.path import isfile
 
-db_full_path = '../MiscProjectFiles/PyBlackJack.db'
+# globals
+default_config_location = '../cfg/sqliteDB_config.ini'
+default_config = [
+    {'DEFAULT':
+        {
+            'db_path': '../MiscProjectFiles/PyBlackJack.db',
+            'script_path': '../MiscProjectFiles/InitializeNewDB.sql'
+        }
+    }
+]
+
+if isfile(default_config_location):
+    current_config = cf.get_config(config_location=default_config_location)
+else:
+    current_config = cf.get_config(config_location=default_config_location,
+                                   config_list_dict=default_config)
+
+db_path = current_config['DEFAULT']['db_path']
+setup_script_path = current_config['DEFAULT']['script_path']
 
 
-def InitializeNewDB(script_path='../MiscProjectFiles/InitializeNewDB.sql'):
+def InitializeNewDB(script_path, db_full_path):
     def _ReadAndCreateDB():
         conn = sqlite3.connect(db_full_path)
         print(f"database {db_full_path} created.")
@@ -23,13 +42,14 @@ def InitializeNewDB(script_path='../MiscProjectFiles/InitializeNewDB.sql'):
             warn = input(f"DB file ({db_full_path}) already exists. "
                          f"Are you sure you want to reinitialize the database? (y/n/q): ").lower()
             if warn == 'y':
-                os.remove(db_full_path)
+                remove(db_full_path)
                 print("Database removed!")
                 conn = _ReadAndCreateDB()
                 return conn
             elif warn == 'n':
                 print("Database NOT removed or recreated.")
-                break
+                conn = sqlite3.connect(db_full_path)
+                return conn
             elif warn == 'q':
                 print("Ok Quitting!")
                 exit(0)
@@ -40,5 +60,13 @@ def InitializeNewDB(script_path='../MiscProjectFiles/InitializeNewDB.sql'):
         return conn
 
 
+def GetSQLliteConn(SQLlite_db_path=db_path):
+    conn = sqlite3.connect(SQLlite_db_path)
+    print(f"Connection to {SQLlite_db_path} established")
+    return conn
+
+# TODO: add to db (add player and bank account) and query for preexisting players
+
 if __name__ == "__main__":
-    InitializeNewDB()
+    InitializeNewDB(script_path=setup_script_path,
+                    db_full_path=db_path)

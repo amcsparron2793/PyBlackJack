@@ -6,8 +6,6 @@ create table Players(
     unique(player_first_name, player_last_name)
                     );
 
---insert into Players(player_first_name, player_last_name) values ('Andrew', 'McSparron');
-
 create table BankAccounts(
     id integer primary key autoincrement,
     player_id integer not null,
@@ -26,9 +24,6 @@ create table PlayersBankAccounts(
     primary key(player_id, account_id)
                                 );
 
--- insert into BankAccounts(player_id) values (1);
-
-
 create view PlayerBanksFull as
     select P.id as PlayerID,
            P.player_full_name as PlayerName,
@@ -37,3 +32,18 @@ create view PlayerBanksFull as
     from PlayersBankAccounts
         join BankAccounts BA on BA.id = PlayersBankAccounts.account_id
         join Players P on P.id = BA.player_id;
+
+create table WinLossRecords(
+    id integer primary key autoincrement not null,
+    player_id int not null unique,
+    Wins int not null default 0,
+    Losses int not null default 0,
+    foreign key(player_id)
+        references Players(id));
+
+create table LastGamePlayed(
+    id integer primary key autoincrement not null,
+    player_id integer not null,
+    date_of_game datetime not null,
+     foreign key(player_id)
+        references Players(id));
