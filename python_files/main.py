@@ -24,22 +24,24 @@ class EmptyShoeError(BaseException):
 
 
 class Cards:
+    UNICODE_SUITS = ['\u2664', '\u2661', '\u2662', '\u2667']
+    PLAINTEXT_SUITS = ['Spade', 'Heart', 'Diamond', 'Club']
+    UNICODE_CARD_BACK = '\U0001F0A0'
+    PLAINTEXT_CARD_BACK = 'xxxx'
+
     def __init__(self, use_unicode=True, card_back: str = None):
         self.card_back = card_back
-
-        self.unicode_suits = ['\u2664', '\u2661', '\u2662', '\u2667']
-        self.plaintext_suits = ['Spade', 'Heart', 'Diamond', 'Club']
 
         if use_unicode:
             if self.card_back is None:
                 # three leading zeros made this code work
-                self.card_back = '\U0001F0A0'
+                self.card_back = Cards.UNICODE_CARD_BACK
             else:
                 self.card_back = self.card_back
-            self.suit = self.unicode_suits
+            self.suit = Cards.UNICODE_SUITS
         else:
-            self.card_back = 'xxxx'
-            self.suit = self.plaintext_suits
+            self.card_back = Cards.PLAINTEXT_CARD_BACK
+            self.suit = Cards.PLAINTEXT_SUITS
 
         self.value = range(1, 14)
 
@@ -76,7 +78,7 @@ class Deck(Cards):
 
 
 class Player:
-    def __init__(self):
+    def __init__(self, player_chips: int = None,):
         self.hand = []
         self.is_player = True
         self.player_number = self.set_player_number()
@@ -84,6 +86,7 @@ class Player:
         self.busted = False
         self.bet_amount: int = 0
         self.has_bet = False
+        self.chips: int = player_chips or Cage.STARTING_CHIPS
 
     def bankrupt(self):
         print(f"Player {self.player_number} is bankrupt! goodbye!")
@@ -134,8 +137,8 @@ class Player:
 
 
 class Dealer(Player):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, player_chips: int = None):
+        super().__init__(player_chips)
         self.is_player = False
         self.player_number = self.set_player_number()
         self.hidden_hand = []
@@ -172,13 +175,13 @@ class Dealer(Player):
 
 
 class Cage:
+    STARTING_CHIPS = 250
+    CHIP_VALUES = [5, 15, 25, 50]
     def __init__(self):
-        self.starting_chips = 250
-        self.chip_values = [5, 15, 25, 50]
         self.hand_value: int = 0
 
     def pay_in(self, player: Player):
-        player.chips = self.starting_chips
+        player.chips = Cage.STARTING_CHIPS
         return player
 
     def take_bet(self, player: Player):
@@ -279,9 +282,9 @@ class Game:
             self.banker.award_hand_value(self.player)
 
     def setup_new_hand(self):
-        self.player.__init__()
+        self.player.__init__(self.player.chips)
         self.player.hand = game.deal()
-        self.dealer.__init__()
+        self.dealer.__init__(self.dealer.chips)
         self.dealer.hand = game.deal()
         self.dealer.hidden_hand_setup()
 
@@ -344,7 +347,7 @@ class Game:
         else:
             pass
         while True:
-            bet_amount = input(f"How much would you like to bet? (${player.chips} available): ")
+            bet_amount = input(f"How much would you like to bet? (${player.chips:,} available): ")
             if bet_amount.isnumeric():
                 bet_amount = int(bet_amount)
                 break
