@@ -17,7 +17,7 @@ class PyBlackJackConfig(BetterConfigAJM):
             {
                 'DEFAULT':
                     {
-                        'db_path': PyBlackJackConfig.DEFAULT_DB_PATH,
+                        'db_file_path': PyBlackJackConfig.DEFAULT_DB_PATH,
                         'setup_database_script_path': PyBlackJackConfig.SETUP_DATABASE_SCRIPT_PATH,
                         'setup_new_player_script_path': PyBlackJackConfig.SETUP_NEW_PLAYER_SCRIPT_PATH
                     }

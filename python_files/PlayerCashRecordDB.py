@@ -4,20 +4,62 @@ from pathlib import Path
 
 
 class PyBlackJackSQLLite(SQLlite3Helper):
+    """
+    This class provides functionality to interact with a SQLite database for the PyBlackJack
+    application, managing player data and the overall database setup.
+
+    The class inherits from SQLlite3Helper and adds custom methods for initializing the database,
+    creating new player entries, and conducting player information lookups. It serves as the primary
+    interface between the application logic and the persistence layer. The database is set up using
+    SQL scripts defined in configuration.
+
+    :ivar config: Instance of PyBlackJackConfig used for database configuration.
+    :type config: cf.PyBlackJackConfig
+    :ivar db_file_path: File path for the SQLite database file.
+    :type db_file_path: Path
+    :ivar setup_database_script_path: File path for the SQL script to initialize the database.
+    :type setup_database_script_path: Path
+    :ivar setup_new_player_script_path: File path for the SQL script to set up a new player.
+    :type setup_new_player_script_path: Path
+    """
     def __init__(self, db_file_path: str = None, config: cf.PyBlackJackConfig = None):
         self.config = config or cf.PyBlackJackConfig(config_filename=cf.DEFAULT_CONFIG_LOCATION.name,
                               config_dir=cf.DEFAULT_CONFIG_LOCATION.parent)
-        self.db_file_path = Path(db_file_path) or Path(self.config.get('DEFAULT', 'db_file_path'))
+        self.config.GetConfig()
+
+        self._db_file_path = db_file_path
         self.setup_database_script_path = Path(self.config.get('DEFAULT', 'setup_database_script_path'))
         self.setup_new_player_script_path = Path(self.config.get('DEFAULT', 'setup_new_player_script_path'))
+
         super().__init__(self.db_file_path)
         self.GetConnectionAndCursor()
 
-        if not self.db_file_path.is_file():
+
+    @property
+    def db_file_path(self):
+        self._db_file_path = self._db_file_path or Path(self.config.get('DEFAULT', 'db_file_path'))
+        if not self._db_file_path.is_file():
             self.initialize_new_db()
+        return self._db_file_path
+
 
 
     def initialize_new_db(self):
+        """
+        Initializes a new database using the provided SQL script.
+
+        This method reads an SQL script from the file specified by
+        `setup_database_script_path` and executes it to initialize or
+        setup a database. Upon successful execution of the script,
+        all changes are committed to the database.
+
+        :raises FileNotFoundError: If the file specified by
+            `setup_database_script_path` does not exist.
+        :raises sqlite3.DatabaseError: If there is an issue with the execution
+            of the SQL script on the database.
+
+        :return: None
+        """
         with open(self.setup_database_script_path) as sql_file:
             sql_script = sql_file.read()
 
@@ -41,41 +83,53 @@ class PyBlackJackSQLLite(SQLlite3Helper):
        self._cursor.executescript(sql_script)
        self._connection.commit()
        print(f"New Player \'{new_player_string}\' added to database!")
+       return new_player_dict
 
-    def PlayerInfoLookup(self, **kwargs):
-        sql_query_text = None
-        player_first_name = kwargs.get('player_first_name', None)
-        player_last_name = kwargs.get('player_last_name', None)
-        player_id = kwargs.get('player_id', None)
-        if all([player_first_name, player_last_name, player_id]):
-            raise AttributeError('please only enter a name OR a player_id')
-        elif player_first_name and player_last_name:
-            where_text = (player_first_name + ' ' + player_last_name)
-            sql_query_text = f"select id from Players where player_full_name = '{where_text}'"
-        elif player_id:
-            p_id = kwargs['player_id']
-            where_text = int(p_id)
-            sql_query_text = f"select id from Players where id = {where_text}"
+    def PlayerIDLookup(self, player_first_name, player_last_name):
+        where_text = ' '.join([player_first_name, player_last_name])
+        sql_query_text = f"select id from Players where player_full_name = '{where_text}'"
 
         self.Query(sql_query_text)
-
-        if self.query_results is None:
-            print('No matching Players found')
-        else:
-            print(self.query_results[0][0])
+        if self.query_results:
             return self.query_results[0][0]
+        else:
+            print(f"Player {where_text} not found in database.")
+            return None
+
+    def PlayerInfoLookup(self, player_id):
+        """
+        Looks up player information based on the provided parameters. This method constructs
+        and executes SQL queries to retrieve data about a player and their bank account
+        information. The user can specify either the player's first and last name or their
+        unique player ID to perform the lookup. An error is raised if both types of inputs
+        are provided simultaneously.
+
+        :param player_id: The unique identifier for the player.
+        :type player_id: int
+        :return: A dictionary containing the player's bank account details retrieved
+            from the database query.
+        :rtype: dict
+        :raises AttributeError: If both the player's full name and player_id are provided.
+        """
+
+        bank_account_query = (f"select PlayerID, PlayerName, AccountID, account_balance "
+                              f"from PlayerBanksFull where PlayerID = {player_id}")
+        if not player_id:
+            raise AttributeError("player_id must be provided to perform a lookup.")
+        self.Query(bank_account_query)
+        if self.query_results:
+            return self.list_dict_results[0]
+        else:
+            print(f"Player with ID {player_id} not found in database.")
+            return None
+
+
 
 
 # TODO: add to db (add player and bank account) and query for preexisting players
 
 
 if __name__ == "__main__":
-    ...
-    # main_logger = alogger()
-    # main_logger.FinalInit()
-    #
-    # cn = GetSQLliteConn()
-    # #NewPlayerSetup(cn, {'fname': '\'Default\'', 'lname': '\'Player\''}, logger=main_logger)
-    # player_name_dict = {'player_first_name': 'Andrew', 'player_last_name': 'McSparron'}
-    # player_id_dict = {'player_id': 1}
-    # PlayerInfoLookup(cn, **player_name_dict)# **player_id_dict)
+    pbj_db = PyBlackJackSQLLite()
+    p_info = pbj_db.PlayerInfoLookup(pbj_db.PlayerIDLookup(player_first_name='Andrew', player_last_name='McSparron'))
+    print(p_info)
