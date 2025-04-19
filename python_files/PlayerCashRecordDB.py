@@ -96,24 +96,26 @@ class PyBlackJackSQLLite(SQLlite3Helper):
 
     def PlayerInfoLookup(self, player_id):
         """
-        Looks up player information based on the provided parameters. This method constructs
-        and executes SQL queries to retrieve data about a player and their bank account
-        information. The user can specify either the player's first and last name or their
-        unique player ID to perform the lookup. An error is raised if both types of inputs
-        are provided simultaneously.
+        Performs a lookup for player information in the PlayerBanksFull database.
 
-        :param player_id: The unique identifier for the player.
+        This method queries the PlayerBanksFull table to retrieve player information,
+        including PlayerID, PlayerName, AccountID, and account balance, based on the
+        given player_id. If the player_id is not provided, an exception is raised.
+        If a matching player is found, the relevant details are returned. Otherwise,
+        the method prints a message indicating that the player was not found and
+        returns None.
+
+        :param player_id: The ID of the player to look up.
         :type player_id: int
-        :return: A dictionary containing the player's bank account details retrieved
-            from the database query.
-        :rtype: dict
-        :raises AttributeError: If both the player's full name and player_id are provided.
+        :raises ValueError: If player_id is not provided.
+        :return: A dictionary containing player information if found, otherwise None.
+        :rtype: Optional[dict]
         """
 
         bank_account_query = (f"select PlayerID, PlayerName, AccountID, account_balance "
                               f"from PlayerBanksFull where PlayerID = {player_id}")
         if not player_id:
-            raise AttributeError("player_id must be provided to perform a lookup.")
+            raise ValueError("player_id must be provided to perform a lookup.")
         self.Query(bank_account_query)
         if self.query_results:
             return self.list_dict_results[0]
