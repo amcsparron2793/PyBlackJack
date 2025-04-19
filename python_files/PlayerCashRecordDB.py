@@ -4,27 +4,8 @@ from os import remove
 from os.path import isfile
 from AndrewLogger import AndrewsLogger as alogger
 
-# globals
-default_config_location = '../cfg/sqliteDB_config.ini'
-default_config = [
-    {'DEFAULT':
-        {
-            'db_path': '../MiscProjectFiles/PyBlackJack.db',
-            'setupDB_script_path': '../MiscProjectFiles/InitializeNewDB.sql',
-            'new_player_setup': '../MiscProjectFiles/NewPlayerSetup.sql'
-        }
-    }
-]
-
-if isfile(default_config_location):
-    current_config = cf.get_config(config_location=default_config_location)
-else:
-    current_config = cf.get_config(config_location=default_config_location,
-                                   config_list_dict=default_config)
-
-db_path = current_config['DEFAULT']['db_path']
-setupDB_script_path = current_config['DEFAULT']['setupDB_script_path']
-NewPlayerSetupScript = current_config['DEFAULT']['new_player_setup']
+config = cf.PyBJConfig(config_filename=cf.DEFAULT_CONFIG_LOCATION.name,
+                       config_dir=cf.DEFAULT_CONFIG_LOCATION.parent)
 
 
 def InitializeNewDB(script_path, db_full_path, logger: alogger = None):

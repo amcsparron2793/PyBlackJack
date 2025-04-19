@@ -4,6 +4,9 @@ from pathlib import Path
 
 from BetterConfigAJM import BetterConfigAJM
 
+DEFAULT_CONFIG_LOCATION = Path('../cfg/sqliteDB_config.ini')
+
+
 class PyBJConfig(BetterConfigAJM):
     DEFAULT_DB_PATH = '../MiscProjectFiles/PyBlackJack.db'
     SETUP_DATABASE_SCRIPT_PATH = '../MiscProjectFiles/InitializeNewDB.sql'
