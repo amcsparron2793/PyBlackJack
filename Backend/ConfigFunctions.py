@@ -1,16 +1,16 @@
 from logging import Logger
 from typing import List
 from pathlib import Path
-
+from Backend.settings import GAME_ROOT_FOLDER
 from BetterConfigAJM import BetterConfigAJM
 
-DEFAULT_CONFIG_LOCATION = Path('../cfg/sqliteDB_config.ini')
+DEFAULT_CONFIG_LOCATION = Path(GAME_ROOT_FOLDER, 'cfg/sqliteDB_config.ini')
 
 
 class PyBlackJackConfig(BetterConfigAJM):
-    DEFAULT_DB_PATH = '../MiscProjectFiles/PyBlackJack.db'
-    SETUP_DATABASE_SCRIPT_PATH = '../MiscProjectFiles/InitializeNewDB.sql'
-    SETUP_NEW_PLAYER_SCRIPT_PATH = '../MiscProjectFiles/NewPlayerSetup.sql'
+    DEFAULT_DB_PATH = Path(GAME_ROOT_FOLDER, 'MiscProjectFiles/PyBlackJack.db')
+    SETUP_DATABASE_SCRIPT_PATH = Path(GAME_ROOT_FOLDER, 'MiscProjectFiles/InitializeNewDB.sql')
+    SETUP_NEW_PLAYER_SCRIPT_PATH = Path(GAME_ROOT_FOLDER, 'MiscProjectFiles/NewPlayerSetup.sql')
     def __init__(self, config_filename, config_dir, config_list_dict: List[dict] = None, logger: Logger = None):
         super().__init__(config_filename, config_dir, config_list_dict, logger)
         self.default_config = [

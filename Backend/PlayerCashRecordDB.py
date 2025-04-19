@@ -1,6 +1,6 @@
 from sqlite3 import DatabaseError, OperationalError, IntegrityError
 
-import ConfigFunctions as cf
+import Backend.ConfigFunctions as cf
 from SQLLite3HelperClass import SQLlite3Helper
 from pathlib import Path
 
@@ -175,7 +175,8 @@ class PyBlackJackSQLLite(SQLlite3Helper):
         """
         self.check_initialization()
 
-        bank_account_query = (f"select PlayerID, PlayerName, AccountID, account_balance "
+        bank_account_query = (f"select PlayerID as player_id, PlayerName as player_name,"
+                              f" AccountID as account_id, account_balance as account_balance "
                               f"from PlayerBanksFull where PlayerID = {player_id}")
         if not player_id:
             raise ValueError("player_id must be provided to perform a lookup.")
@@ -185,6 +186,23 @@ class PyBlackJackSQLLite(SQLlite3Helper):
         else:
             print(f"Player with ID {player_id} not found in database.")
             return None
+
+    def update_player_account_balance(self, new_balance: int, account_id: int):
+        """
+        Updates the player's account balance to the specified value in the database. This method
+        executes an update query on the `BankAccounts` table and commits the transaction. A confirmation
+        message is printed after the update completes.
+
+        :param new_balance: The new balance to be updated in the player's account.
+        :type new_balance: int
+        :param account_id: The unique identifier of the player's bank account.
+        :type account_id: int
+        :return: None
+        """
+        sql_str = f"""update BankAccounts set account_balance = {new_balance} where id = {account_id}"""
+        self.Query(sql_str)
+        self._connection.commit()
+        print(f'updated BankAccount ID {account_id} with new balance ({new_balance}).')
 
 
 

@@ -1,6 +1,7 @@
 import random
 from os import system
 from Backend.settings import STARTING_CHIPS
+from Backend.PlayerCashRecordDB import PyBlackJackSQLLite
 
 class Player:
     """
@@ -252,3 +253,54 @@ class Dealer(Player):
             return bool(random.Random().randint(1, 100) % 2)
         else:
             return True
+
+
+class DatabasePlayer(Player):
+    """
+    Represents a player whose data is retrieved and managed via a database.
+
+    This class extends the `Player` class by adding functionality to interact with
+    a SQLite database for retrieving and updating player information. It initializes
+    with player-specific data such as account balance, player name, and account ID,
+    while leveraging database operations to manage and update these details.
+
+    :ivar account_balance: The current account balance of the player.
+    :type account_balance: Optional[int]
+    :ivar player_name: The name of the player.
+    :type player_name: Optional[str]
+    :ivar account_id: The unique identifier for the player's account.
+    :type account_id: Optional[int]
+    :ivar player_id: The unique identifier for the player, used to query the database.
+    :type player_id: int
+    :ivar db: The database connection and cursor object for managing database operations.
+    :type db: PyBlackJackSQLLite
+    """
+    def __init__(self, player_id):
+        self.account_balance = None
+        self.player_name = None
+        self.account_id = None
+        self.player_id = player_id
+        self.db = PyBlackJackSQLLite()
+        self.db.GetConnectionAndCursor()
+        self.get_player()
+        super().__init__(player_chips=self.account_balance)
+
+    def get_player(self):
+        player_attrs = self.db.PlayerInfoLookup(self.player_id)
+        for name, attr in player_attrs.items():
+            setattr(self, name, attr)
+            print(f"{name} : {attr}")
+
+    def write_new_account_balance(self):
+        if self.chips != self.account_balance:
+            self.db.update_player_account_balance(self.chips, self.account_id)
+            self.account_balance = self.chips
+            print(f"New balance: {self.account_balance}")
+        else:
+            print("No change in balance")
+
+if __name__ == "__main__":
+    p = DatabasePlayer(1)
+    p.chips = 100
+    print(p.account_balance)
+    p.write_new_account_balance()
