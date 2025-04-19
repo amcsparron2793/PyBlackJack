@@ -89,6 +89,24 @@ class PyBlackJackSQLLite(SQLlite3Helper):
             print("Database initialized successfully.")
 
     def new_player_setup(self, new_player_dict: dict):
+        """
+        Sets up a new player in the database using the provided dictionary of
+        player details. The method reads an SQL script, replaces placeholders
+        with actual player data, and executes the script to add the player
+        to the database.
+
+        :param new_player_dict: Dictionary containing details of the new player.
+            Keys must match the expected fields defined within the system.
+        :type new_player_dict: dict
+        :return: The same dictionary provided as input upon successful setup of the player.
+        :rtype: dict
+        :raises FileNotFoundError: If the SQL script file for setting up a new player cannot
+            be found at the specified script path.
+        :raises PlayerExistsError: If the player already exists in the database. This error
+            specifically occurs when the database enforces uniqueness constraints.
+        :raises IntegrityError: If any other database integrity error occurs during the execution
+            of the SQL script.
+        """
         self.check_initialization()
         new_player_string = ' '.join(new_player_dict.values()).replace('\'', '')
         print(f"Setting up new player '{new_player_string}'.")
@@ -116,6 +134,19 @@ class PyBlackJackSQLLite(SQLlite3Helper):
         return new_player_dict
 
     def PlayerIDLookup(self, player_first_name, player_last_name):
+        """
+        Searches the database for a player's ID based on their first and last name. The method
+        executes a SQL query against the 'Players' table using the full name of the player
+        and retrieves the player's ID if it exists in the database. If no player is found,
+        it prints a message to the console and returns None.
+
+        :param player_first_name: The first name of the player to look up
+        :type player_first_name: str
+        :param player_last_name: The last name of the player to look up
+        :type player_last_name: str
+        :return: The ID of the player if found, or None if the player does not exist in the database
+        :rtype: int or None
+        """
         self.check_initialization()
         where_text = ' '.join([player_first_name, player_last_name])
         sql_query_text = f"select id from Players where player_full_name = '{where_text}'"
@@ -129,20 +160,18 @@ class PyBlackJackSQLLite(SQLlite3Helper):
 
     def PlayerInfoLookup(self, player_id):
         """
-        Performs a lookup for player information in the PlayerBanksFull database.
+        Looks up player information in the database and retrieves corresponding player
+        and bank account details based on the provided player ID. Ensures initialization
+        has been performed before executing the query. Returns the first matching record
+        if found; otherwise, logs a message and returns None.
 
-        This method queries the PlayerBanksFull table to retrieve player information,
-        including PlayerID, PlayerName, AccountID, and account balance, based on the
-        given player_id. If the player_id is not provided, an exception is raised.
-        If a matching player is found, the relevant details are returned. Otherwise,
-        the method prints a message indicating that the player was not found and
-        returns None.
-
-        :param player_id: The ID of the player to look up.
+        :param player_id: The unique identifier of the player whose information is
+            being retrieved.
         :type player_id: int
-        :raises ValueError: If player_id is not provided.
-        :return: A dictionary containing player information if found, otherwise None.
-        :rtype: Optional[dict]
+        :raises ValueError: If `player_id` is not provided.
+        :return: A dictionary containing player and bank account details if a match
+            is found; otherwise, None.
+        :rtype: dict or None
         """
         self.check_initialization()
 
