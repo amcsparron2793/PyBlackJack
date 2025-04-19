@@ -2,7 +2,7 @@ import ConfigFunctions as cf
 from SQLLite3HelperClass import SQLlite3Helper
 from pathlib import Path
 
-
+# TODO: integrate!
 class PyBlackJackSQLLite(SQLlite3Helper):
     """
     Provides functionalities for managing players and their information in a
