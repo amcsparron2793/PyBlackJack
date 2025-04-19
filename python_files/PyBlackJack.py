@@ -89,6 +89,8 @@ class Deck(Cards):
         combinations of card values and suits.
     :type deck: list
     """
+
+    SHOE_RUNOUT_WARNING_THRESHOLD = 15
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.deck = list(itertools.product(self.value, self.suit))
@@ -119,7 +121,7 @@ class Deck(Cards):
         :raises EmptyShoeError: If the deck has run out of cards.
         :return: The top card of the deck.
         """
-        if len(self.deck) <= 15:
+        if len(self.deck) <= Deck.SHOE_RUNOUT_WARNING_THRESHOLD:
             print(f"{len(self.deck)} cards left to draw from.")
         if len(self.deck) <= 0:
             raise EmptyShoeError("Deck has run out of cards")
