@@ -1,8 +1,13 @@
-from sqlite3 import DatabaseError, OperationalError
+from sqlite3 import DatabaseError, OperationalError, IntegrityError
 
 import ConfigFunctions as cf
 from SQLLite3HelperClass import SQLlite3Helper
 from pathlib import Path
+
+
+class PlayerExistsError(IntegrityError):
+    ...
+
 
 # TODO: integrate!
 class PyBlackJackSQLLite(SQLlite3Helper):
@@ -22,6 +27,8 @@ class PyBlackJackSQLLite(SQLlite3Helper):
     :ivar setup_new_player_script_path: Path to the SQL script for adding a new player to the database.
     :type setup_new_player_script_path: Path
     """
+    NEW_PLAYER_DICT_KEYS = ['fname', 'lname']
+
     def __init__(self, db_file_path: str = None, config: cf.PyBlackJackConfig = None):
         self._db_initialized = None
         self.config = config or cf.PyBlackJackConfig(config_filename=cf.DEFAULT_CONFIG_LOCATION.name,
@@ -79,6 +86,7 @@ class PyBlackJackSQLLite(SQLlite3Helper):
 
             self._cursor.executescript(sql_script)
             self._connection.commit()
+            print("Database initialized successfully.")
 
     def new_player_setup(self, new_player_dict: dict):
         self.check_initialization()
@@ -87,17 +95,24 @@ class PyBlackJackSQLLite(SQLlite3Helper):
         try:
             with open(self.setup_new_player_script_path) as sql_file:
                 sql_script = sql_file.read()
-                sql_script = sql_script.replace(':fname',
-                                               new_player_dict['fname']
-                                               ).replace(':lname',
-                                                         new_player_dict['lname'])
+
+                new_fname = f'\'{new_player_dict[PyBlackJackSQLLite.NEW_PLAYER_DICT_KEYS[0]]}\''
+                new_lname = f'\'{new_player_dict[PyBlackJackSQLLite.NEW_PLAYER_DICT_KEYS[1]]}\''
+
+                sql_script = sql_script.replace(f':{PyBlackJackSQLLite.NEW_PLAYER_DICT_KEYS[0]}', new_fname
+                                                ).replace(f':{PyBlackJackSQLLite.NEW_PLAYER_DICT_KEYS[1]}', new_lname)
                 print('SQL script ready.')
         except FileNotFoundError as e:
            raise e
-
-        self._cursor.executescript(sql_script)
-        self._connection.commit()
-        print(f"New Player \'{new_player_string}\' added to database!")
+        try:
+            self._cursor.executescript(sql_script)
+            self._connection.commit()
+            print(f"New Player \'{new_player_string}\' added to database!")
+        except IntegrityError as e:
+            if 'UNIQUE constraint failed' in str(e):
+                raise PlayerExistsError(f"Player \'{new_player_string}\' already exists in database.") from None
+            else:
+                raise e
         return new_player_dict
 
     def PlayerIDLookup(self, player_first_name, player_last_name):
@@ -150,6 +165,8 @@ class PyBlackJackSQLLite(SQLlite3Helper):
 
 if __name__ == "__main__":
     pbj_db = PyBlackJackSQLLite()
-    # pbj_db.initialize_new_db()
-    p_info = pbj_db.PlayerInfoLookup(pbj_db.PlayerIDLookup(player_first_name='Andrew', player_last_name='McSparron'))
-    print(p_info)
+    #pbj_db.initialize_new_db()
+    #pbj_db.new_player_setup({'fname': 'Andrew', 'lname': 'McSparron'})
+    #p_info = pbj_db.PlayerInfoLookup(pbj_db.PlayerIDLookup(player_first_name='Andrew', player_last_name='McSparron'))
+
+    #print(p_info)
