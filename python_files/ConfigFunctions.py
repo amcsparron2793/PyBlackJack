@@ -7,7 +7,7 @@ from BetterConfigAJM import BetterConfigAJM
 DEFAULT_CONFIG_LOCATION = Path('../cfg/sqliteDB_config.ini')
 
 
-class PyBJConfig(BetterConfigAJM):
+class PyBlackJackConfig(BetterConfigAJM):
     DEFAULT_DB_PATH = '../MiscProjectFiles/PyBlackJack.db'
     SETUP_DATABASE_SCRIPT_PATH = '../MiscProjectFiles/InitializeNewDB.sql'
     SETUP_NEW_PLAYER_SCRIPT_PATH = '../MiscProjectFiles/NewPlayerSetup.sql'
@@ -17,9 +17,9 @@ class PyBJConfig(BetterConfigAJM):
             {
                 'DEFAULT':
                     {
-                        'db_path': PyBJConfig.DEFAULT_DB_PATH,
-                        'setup_database_script_path': PyBJConfig.SETUP_DATABASE_SCRIPT_PATH,
-                        'setup_new_player_script_path': PyBJConfig.SETUP_NEW_PLAYER_SCRIPT_PATH
+                        'db_path': PyBlackJackConfig.DEFAULT_DB_PATH,
+                        'setup_database_script_path': PyBlackJackConfig.SETUP_DATABASE_SCRIPT_PATH,
+                        'setup_new_player_script_path': PyBlackJackConfig.SETUP_NEW_PLAYER_SCRIPT_PATH
                     }
              }
         ]
@@ -31,6 +31,6 @@ class PyBJConfig(BetterConfigAJM):
         self.config_location = Path(self.config_location).resolve()
 
 if __name__ == "__main__":
-    config = PyBJConfig(config_filename='sqliteDB_config.ini', config_dir='../cfg')
+    config = PyBlackJackConfig(config_filename='sqliteDB_config.ini', config_dir='../cfg')
     config.GetConfig()
     print(config['DEFAULT']['db_path'])
