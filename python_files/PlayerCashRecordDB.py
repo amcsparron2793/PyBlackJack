@@ -1,3 +1,5 @@
+from sqlite3 import DatabaseError, OperationalError
+
 import ConfigFunctions as cf
 from SQLLite3HelperClass import SQLlite3Helper
 from pathlib import Path
@@ -21,26 +23,40 @@ class PyBlackJackSQLLite(SQLlite3Helper):
     :type setup_new_player_script_path: Path
     """
     def __init__(self, db_file_path: str = None, config: cf.PyBlackJackConfig = None):
+        self._db_initialized = None
         self.config = config or cf.PyBlackJackConfig(config_filename=cf.DEFAULT_CONFIG_LOCATION.name,
                               config_dir=cf.DEFAULT_CONFIG_LOCATION.parent)
         self.config.GetConfig()
 
-        self._db_file_path = db_file_path
+        self.db_file_path = db_file_path or Path(self.config.get('DEFAULT', 'db_file_path'))
         self.setup_database_script_path = Path(self.config.get('DEFAULT', 'setup_database_script_path'))
         self.setup_new_player_script_path = Path(self.config.get('DEFAULT', 'setup_new_player_script_path'))
 
         super().__init__(self.db_file_path)
+        if self.db_file_path.exists() and not isinstance(self.db_file_path, Path):
+            self.db_file_path = Path(self.db_file_path)
         self.GetConnectionAndCursor()
 
 
     @property
-    def db_file_path(self):
-        self._db_file_path = self._db_file_path or Path(self.config.get('DEFAULT', 'db_file_path'))
-        if not self._db_file_path.is_file():
-            self.initialize_new_db()
-        return self._db_file_path
+    def db_initialized(self):
+        if not self._db_initialized:
+            if not hasattr(self, '_cursor'):
+                self._db_initialized = False
+            else:
+                try:
+                    self.Query("SELECT name FROM sqlite_master WHERE type='table';")
+                    if self.query_results:
+                        self._db_initialized = True
+                    else:
+                        self._db_initialized = False
+                except OperationalError:
+                    self._db_initialized = False
+        return self._db_initialized
 
-
+    def check_initialization(self):
+        if not self.db_initialized:
+            raise DatabaseError("Database not initialized. Please initialize the database first.")
 
     def initialize_new_db(self):
         """
@@ -65,25 +81,27 @@ class PyBlackJackSQLLite(SQLlite3Helper):
             self._connection.commit()
 
     def new_player_setup(self, new_player_dict: dict):
-       new_player_string = ' '.join(new_player_dict.values()).replace('\'', '')
-       print(f"Setting up new player '{new_player_string}'.")
-       try:
-           with open(self.setup_new_player_script_path) as sql_file:
-               sql_script = sql_file.read()
-               sql_script = sql_script.replace(':fname',
+        self.check_initialization()
+        new_player_string = ' '.join(new_player_dict.values()).replace('\'', '')
+        print(f"Setting up new player '{new_player_string}'.")
+        try:
+            with open(self.setup_new_player_script_path) as sql_file:
+                sql_script = sql_file.read()
+                sql_script = sql_script.replace(':fname',
                                                new_player_dict['fname']
                                                ).replace(':lname',
                                                          new_player_dict['lname'])
-               print('SQL script ready.')
-       except FileNotFoundError as e:
+                print('SQL script ready.')
+        except FileNotFoundError as e:
            raise e
 
-       self._cursor.executescript(sql_script)
-       self._connection.commit()
-       print(f"New Player \'{new_player_string}\' added to database!")
-       return new_player_dict
+        self._cursor.executescript(sql_script)
+        self._connection.commit()
+        print(f"New Player \'{new_player_string}\' added to database!")
+        return new_player_dict
 
     def PlayerIDLookup(self, player_first_name, player_last_name):
+        self.check_initialization()
         where_text = ' '.join([player_first_name, player_last_name])
         sql_query_text = f"select id from Players where player_full_name = '{where_text}'"
 
@@ -111,6 +129,7 @@ class PyBlackJackSQLLite(SQLlite3Helper):
         :return: A dictionary containing player information if found, otherwise None.
         :rtype: Optional[dict]
         """
+        self.check_initialization()
 
         bank_account_query = (f"select PlayerID, PlayerName, AccountID, account_balance "
                               f"from PlayerBanksFull where PlayerID = {player_id}")
@@ -131,5 +150,6 @@ class PyBlackJackSQLLite(SQLlite3Helper):
 
 if __name__ == "__main__":
     pbj_db = PyBlackJackSQLLite()
+    # pbj_db.initialize_new_db()
     p_info = pbj_db.PlayerInfoLookup(pbj_db.PlayerIDLookup(player_first_name='Andrew', player_last_name='McSparron'))
     print(p_info)
