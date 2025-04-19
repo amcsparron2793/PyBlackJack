@@ -5,21 +5,19 @@ from pathlib import Path
 
 class PyBlackJackSQLLite(SQLlite3Helper):
     """
-    This class provides functionality to interact with a SQLite database for the PyBlackJack
-    application, managing player data and the overall database setup.
+    Provides functionalities for managing players and their information in a
+    BlackJack game application using an SQLite database.
 
-    The class inherits from SQLlite3Helper and adds custom methods for initializing the database,
-    creating new player entries, and conducting player information lookups. It serves as the primary
-    interface between the application logic and the persistence layer. The database is set up using
-    SQL scripts defined in configuration.
+    This class extends the `SQLlite3Helper` and provides additional features for
+    initializing a database, managing player data, and retrieving player information.
+    It is tightly coupled with the `PyBlackJackConfig` class, from which it sources
+    configuration details such as database file paths and script paths.
 
-    :ivar config: Instance of PyBlackJackConfig used for database configuration.
-    :type config: cf.PyBlackJackConfig
-    :ivar db_file_path: File path for the SQLite database file.
-    :type db_file_path: Path
-    :ivar setup_database_script_path: File path for the SQL script to initialize the database.
+    :ivar config: Configuration object used to retrieve settings and paths for the database.
+    :type config: PyBlackJackConfig
+    :ivar setup_database_script_path: Path to the SQL script used for setting up the database.
     :type setup_database_script_path: Path
-    :ivar setup_new_player_script_path: File path for the SQL script to set up a new player.
+    :ivar setup_new_player_script_path: Path to the SQL script for adding a new player to the database.
     :type setup_new_player_script_path: Path
     """
     def __init__(self, db_file_path: str = None, config: cf.PyBlackJackConfig = None):
