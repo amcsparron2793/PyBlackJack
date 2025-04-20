@@ -39,6 +39,7 @@ class Player:
         self.busted = False
         self.bet_amount: int = 0
         self.has_bet = False
+        self.needs_pay_in = False
         if isinstance(self.chips, int) and self.chips == 0:
             self.bankrupt()
 
@@ -59,7 +60,8 @@ class Player:
         else:
             if yes_no("Player is bankrupt. Would you like to buy back in and play again?"):
                 self.chips = STARTING_CHIPS
-                return
+                self.needs_pay_in = True
+                return self.needs_pay_in
 
         print(f"Player {self.player_number} is bankrupt! goodbye!")
         system("pause")

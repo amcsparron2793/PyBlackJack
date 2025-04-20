@@ -167,6 +167,8 @@ class Game:
     def bet_question(self, player: Player):
         if player.chips <= 0:
             player.bankrupt()
+            if player.needs_pay_in:
+                self.banker.pay_in(player)
         else:
             pass
         while True:
