@@ -40,7 +40,7 @@ class Game:
             return player
 
     def hit(self, player: Player):
-        print(f"Player: {player.player_number} Decided to hit!")
+        print(f"Player: {player.player_display_name} Decided to hit!")
         player.hand.append(self.game_deck.draw())
         self.check_bust(player)
         if player.busted:
@@ -54,7 +54,7 @@ class Game:
 
     @staticmethod
     def stay(player):
-        print(f"Player: {player.player_number} Decided to stay!")
+        print(f"Player: {player.player_display_name} Decided to stay!")
         player.last_move = 'stay'
         return player
 
@@ -76,26 +76,26 @@ class Game:
                 print("Please choose hit or stay.")
 
     def is_bust(self, player: Player):
-        print(f"Player {player.player_number} Busted! Game over.")
+        print(f"Player {player.player_display_name} Busted! Game over.")
         player.busted = True
         self.end_hand()
         return player
 
     def display_winner(self):
         if self.player.busted:
-            print(f"{self.dealer.player_display_name()} Wins!!!!!!!!")
+            print(f"{self.dealer.player_display_name} Wins!!!!!!!!")
             self.banker.award_hand_value(self.dealer)
 
         elif self.dealer.busted:
-            print(f"Player {self.player.player_display_name()} Wins!!!!!!!")
+            print(f"Player {self.player.player_display_name} Wins!!!!!!!")
             self.banker.award_hand_value(self.player)
 
         elif self.player.get_hand_value() < self.dealer.get_hand_value():
-            print(f"{self.dealer.player_display_name()} Wins!!!!!!!!")
+            print(f"{self.dealer.player_display_name} Wins!!!!!!!!")
             self.banker.award_hand_value(self.dealer)
 
         elif self.player.get_hand_value() > self.dealer.get_hand_value():
-            print(f"Player {self.player.player_display_name()} Wins!!!!!!!")
+            print(f"Player {self.player.player_display_name} Wins!!!!!!!")
             self.banker.award_hand_value(self.player)
 
     def setup_new_hand(self):

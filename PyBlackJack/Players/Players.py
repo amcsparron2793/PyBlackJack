@@ -15,10 +15,6 @@ class Player:
 
     :ivar hand: Represents the cards currently in the player's possession.
     :type hand: list
-    :ivar is_player: Indicates whether the instance represents an actual player or the dealer.
-    :type is_player: bool
-    :ivar player_number: Identifies the player with a unique number or a special 'Dealer' identifier.
-    :type player_number: int or str
     :ivar last_move: Stores the last move made by the player. Defaults to None.
     :type last_move: Any
     :ivar busted: Tracks whether the player has exceeded the game's card limit.
@@ -35,8 +31,6 @@ class Player:
     def __init__(self, player_chips: int = None,):
         self.hand = []
         self.chips = player_chips
-        self.is_player = True
-        self.player_number = self.player_display_name()
         self.last_move = None
         self.busted = False
         self.bet_amount: int = 0
@@ -65,7 +59,7 @@ class Player:
                 self.needs_pay_in = True
                 return self.needs_pay_in
 
-        print(f"Player {self.player_number} is bankrupt! goodbye!")
+        print(f"Player {self.player_display_name} is bankrupt! goodbye!")
         system("pause")
         exit(0)
 
@@ -99,25 +93,23 @@ class Player:
                 p_hand.append(x)
         return p_hand
 
+    @property
     def player_display_name(self):
         """
-        Determines and sets the identifier for the current entity, which can be a
-        player or a dealer. The identifier will be used for tracking and managing
-        data within the database such as available cash or other relevant
-        attributes.
+        Returns the display name of the player.
 
-        :raises AttributeError: If the `is_player` attribute is not defined in the
-            calling context or is missing.
-        :return: Returns the identifier of the entity. It will return an integer (1)
-            if the entity is a player, or a string ("Dealer") if it is the dealer.
-        :rtype: Union[int, str]
+        This method determines the display name based on the class of the object. If the
+        object is not a subclass of the Dealer class, it returns a generic identifier.
+        Otherwise, it identifies the object as a "Dealer". It is intended to facilitate
+        database tracking of player-specific information such as available cash.
+
+        :return: The display name of the player.
+        :rtype: Union[str, int]
         """
-        # TODO: change this to player name and use it as part of db tracking of available cash etc
-        if self.is_player:
-            player_display_name = 1
+        if not issubclass(self.__class__, Dealer):
+            return 1
         else:
-            player_display_name = "Dealer"
-        return player_display_name
+            return "Dealer"
 
     def print_hand(self):
         """
@@ -130,7 +122,7 @@ class Player:
         :return: None
         """
         print_hand = self.get_print_hand(self.hand)
-        print(f"Player {self.player_number}: {print_hand}")
+        print(f"Player {self.player_display_name}: {print_hand}")
 
     def get_hand_value(self):
         """
@@ -169,20 +161,12 @@ class Dealer(Player):
     stay based on a certain set of conditions. This class is specifically designed
     to follow game-specific rules for dealer behavior.
 
-    :ivar is_player: Indicates whether the instance is a player or not.
-                     Always False for a dealer.
-    :type is_player: bool
-    :ivar player_number: The player number assigned to the dealer through the
-                         ``set_player_number`` method.
-    :type player_number: Any
     :ivar hidden_hand: Represents the dealer's hand with one or more cards
                        intentionally hidden.
     :type hidden_hand: list
     """
     def __init__(self, chosen_card_back, player_chips: int = None):
         super().__init__(player_chips)
-        self.is_player = False
-        self.player_number = self.player_display_name()
         self.hidden_hand = []
         self.chosen_card_back = chosen_card_back
 
@@ -196,7 +180,7 @@ class Dealer(Player):
         :rtype: None
         """
         print_hand = self.get_print_hand(self.hidden_hand)
-        print(f"{self.player_number}: {print_hand}")
+        print(f"{self.player_display_name}: {print_hand}")
 
     def hidden_hand_setup(self):
         """
@@ -237,7 +221,7 @@ class Dealer(Player):
         :rtype: NoneType
         """
         print_hand = self.get_print_hand(self.hand)
-        print(f"{self.player_number}: {print_hand}")
+        print(f"{self.player_display_name}: {print_hand}")
 
     def should_stay(self):
         """
@@ -301,11 +285,12 @@ class DatabasePlayer(Player):
 
         super().__init__(player_chips=self.account_balance)
 
+    @property
     def player_display_name(self):
-        if isinstance(self, DatabasePlayer):
+        if issubclass(self.__class__, DatabasePlayer):
             return self.player_name
         else:
-            return super().player_display_name()
+            return super().player_display_name
 
     def get_player(self):
         player_attrs = self.db.PlayerInfoLookup(self.player_id)
@@ -347,4 +332,3 @@ if __name__ == "__main__":
     p = DatabasePlayer(1)
     p.chips = 100
     print(p.account_balance)
-    p.write_new_account_balance()
