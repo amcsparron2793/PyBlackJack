@@ -83,19 +83,19 @@ class Game:
 
     def display_winner(self):
         if self.player.busted:
-            print(f"{self.dealer.set_player_number()} Wins!!!!!!!!")
+            print(f"{self.dealer.player_display_name()} Wins!!!!!!!!")
             self.banker.award_hand_value(self.dealer)
 
         elif self.dealer.busted:
-            print(f"Player {self.player.set_player_number()} Wins!!!!!!!")
+            print(f"Player {self.player.player_display_name()} Wins!!!!!!!")
             self.banker.award_hand_value(self.player)
 
         elif self.player.get_hand_value() < self.dealer.get_hand_value():
-            print(f"{self.dealer.set_player_number()} Wins!!!!!!!!")
+            print(f"{self.dealer.player_display_name()} Wins!!!!!!!!")
             self.banker.award_hand_value(self.dealer)
 
         elif self.player.get_hand_value() > self.dealer.get_hand_value():
-            print(f"Player {self.player.set_player_number()} Wins!!!!!!!")
+            print(f"Player {self.player.player_display_name()} Wins!!!!!!!")
             self.banker.award_hand_value(self.player)
 
     def setup_new_hand(self):

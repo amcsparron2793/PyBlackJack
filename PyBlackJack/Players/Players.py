@@ -36,7 +36,7 @@ class Player:
         self.hand = []
         self.chips = player_chips
         self.is_player = True
-        self.player_number = self.set_player_number()
+        self.player_number = self.player_display_name()
         self.last_move = None
         self.busted = False
         self.bet_amount: int = 0
@@ -99,7 +99,7 @@ class Player:
                 p_hand.append(x)
         return p_hand
 
-    def set_player_number(self):
+    def player_display_name(self):
         """
         Determines and sets the identifier for the current entity, which can be a
         player or a dealer. The identifier will be used for tracking and managing
@@ -114,10 +114,10 @@ class Player:
         """
         # TODO: change this to player name and use it as part of db tracking of available cash etc
         if self.is_player:
-            player_id = 1
+            player_display_name = 1
         else:
-            player_id = "Dealer"
-        return player_id
+            player_display_name = "Dealer"
+        return player_display_name
 
     def print_hand(self):
         """
@@ -182,7 +182,7 @@ class Dealer(Player):
     def __init__(self, chosen_card_back, player_chips: int = None):
         super().__init__(player_chips)
         self.is_player = False
-        self.player_number = self.set_player_number()
+        self.player_number = self.player_display_name()
         self.hidden_hand = []
         self.chosen_card_back = chosen_card_back
 
@@ -301,11 +301,11 @@ class DatabasePlayer(Player):
 
         super().__init__(player_chips=self.account_balance)
 
-    def set_player_number(self):
+    def player_display_name(self):
         if isinstance(self, DatabasePlayer):
             return self.player_name
         else:
-            return super().set_player_number()
+            return super().player_display_name()
 
     def get_player(self):
         player_attrs = self.db.PlayerInfoLookup(self.player_id)
