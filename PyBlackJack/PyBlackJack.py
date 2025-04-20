@@ -8,6 +8,9 @@ from Players.Players import Player, Dealer, DatabasePlayer
 from Bank.Cage import Cage, DatabaseCage
 from Backend.PlayerCashRecordDB import PyBlackJackSQLLite
 
+
+# TODO: add 'add new player' functionality to db
+# TODO: add Settings class
 class Game:
     def __init__(self, use_database=False, **kwargs):
         self.game_deck = Deck()
