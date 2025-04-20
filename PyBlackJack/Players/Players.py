@@ -1,7 +1,8 @@
 import random
 from os import system
+from Backend import yes_no
 from Backend.settings import STARTING_CHIPS
-from Backend.PlayerCashRecordDB import PyBlackJackSQLLite
+from Backend.PlayerCashRecordDB import PyBlackJackSQLLite, PlayerDoesNotExistError
 
 class Player:
     """
@@ -31,27 +32,35 @@ class Player:
     """
     def __init__(self, player_chips: int = None,):
         self.hand = []
+        self.chips = player_chips
         self.is_player = True
         self.player_number = self.set_player_number()
         self.last_move = None
         self.busted = False
         self.bet_amount: int = 0
         self.has_bet = False
-        if isinstance(player_chips, int) and player_chips == 0:
+        if isinstance(self.chips, int) and self.chips == 0:
             self.bankrupt()
-        self.chips: int = player_chips or STARTING_CHIPS
 
     def bankrupt(self):
         """
-        Indicates that the player has gone bankrupt and exits the program.
+        Handles the scenario where a player becomes bankrupt during a game.
 
-        The method prints a message indicating that the player is bankrupt,
-        displays a system pause, and subsequently terminates the program. It
-        does not return any value and is primarily used to handle player
-        bankruptcy scenarios during the game.
+        The method checks whether the player has already been marked as "busted".
+        If not, it prompts the player with the option to buy back into the game
+        and continue playing. If the player agrees, their chips are reset to
+        the defined starting value. If the player declines, the game exits for
+        that player with a farewell message.
 
         :return: None
         """
+        if self.busted:
+            pass
+        else:
+            if yes_no("Player is bankrupt. Would you like to buy back in and play again?"):
+                self.chips = STARTING_CHIPS
+                return
+
         print(f"Player {self.player_number} is bankrupt! goodbye!")
         system("pause")
         exit(0)
@@ -288,10 +297,45 @@ class DatabasePlayer(Player):
 
         super().__init__(player_chips=self.account_balance)
 
+    def set_player_number(self):
+        if isinstance(self, DatabasePlayer):
+            return self.player_name
+        else:
+            return super().set_player_number()
+
     def get_player(self):
         player_attrs = self.db.PlayerInfoLookup(self.player_id)
+        if not player_attrs:
+            np_dict =  self.build_player_dict()
+            np_id = self.db.new_player_setup(np_dict)
+            self.player_id = np_id
+            player_attrs = self.db.PlayerInfoLookup(self.player_id)
+
         for name, attr in player_attrs.items():
             setattr(self, name, attr)
+
+    @staticmethod
+    def _get_new_player_name(get_first_or_last_name: str):
+        if get_first_or_last_name.lower() in ['first', 'last']:
+            pass
+        else:
+            raise AttributeError('get_first_or_last_name must be either "first" or "last"')
+
+        while True:
+            name = input(f"Enter {get_first_or_last_name} name: ").title()
+            if name.isalpha():
+                return name
+            else:
+                print("Please enter a valid name.")
+
+    def build_player_dict(self):
+        if yes_no("Player does not exist in database. Would you like to create a new player?"):
+            fn = self._get_new_player_name('first')
+            ln = self._get_new_player_name('last')
+            return {self.db.NEW_PLAYER_DICT_KEYS[0]: fn, self.db.NEW_PLAYER_DICT_KEYS[1]: ln}
+        else:
+            raise PlayerDoesNotExistError("Player does not exist in database.")
+
 
 
 

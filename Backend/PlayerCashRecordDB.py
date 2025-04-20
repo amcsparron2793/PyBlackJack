@@ -9,6 +9,10 @@ class PlayerExistsError(IntegrityError):
     ...
 
 
+class PlayerDoesNotExistError(Exception):
+    ...
+
+
 class PyBlackJackSQLLite(SQLlite3Helper):
     """
     Provides functionalities for managing players and their information in a
@@ -124,13 +128,16 @@ class PyBlackJackSQLLite(SQLlite3Helper):
         try:
             self._cursor.executescript(sql_script)
             self._connection.commit()
+
+            self.Query(f"SELECT id FROM Players WHERE player_first_name = {new_fname} AND player_last_name = {new_lname}")
+            new_player_id = self.query_results[0][0]
             print(f"New Player \'{new_player_string}\' added to database!")
         except IntegrityError as e:
             if 'UNIQUE constraint failed' in str(e):
                 raise PlayerExistsError(f"Player \'{new_player_string}\' already exists in database.") from None
             else:
                 raise e
-        return new_player_dict
+        return new_player_id
 
     def PlayerIDLookup(self, player_first_name, player_last_name):
         """
