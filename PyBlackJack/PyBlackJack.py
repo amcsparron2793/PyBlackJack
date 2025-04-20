@@ -4,18 +4,22 @@ PyBlackJack
 """
 from os import system
 from Deck.DeckOfCards import Deck
-from Players.Players import Player, Dealer
-from Bank.Cage import Cage
-
-
-
+from Players.Players import Player, Dealer, DatabasePlayer
+from Bank.Cage import Cage, DatabaseCage
+from Backend.PlayerCashRecordDB import PyBlackJackSQLLite
 
 class Game:
-    def __init__(self):
+    def __init__(self, use_database=False, **kwargs):
         self.game_deck = Deck()
         self.game_deck.shuffle_deck()
-        self.banker = Cage()
-        self.player = Player()
+        if not use_database:
+            self.banker = Cage()
+            self.player = Player()
+        else:
+            self.db = kwargs.get('db', PyBlackJackSQLLite())
+            self.banker = DatabaseCage(self.db)
+            self.player = DatabasePlayer(kwargs.get('player_id', 1))
+
         self.dealer = Dealer(chosen_card_back=self.game_deck.card_back)
         # initialize player chips and dealer chips
         self.banker.pay_in(self.player)
@@ -71,7 +75,7 @@ class Game:
     def is_bust(self, player: Player):
         print(f"Player {player.player_number} Busted! Game over.")
         player.busted = True
-        self.display_winner()
+        self.end_hand()
         return player
 
     def display_winner(self):
@@ -92,7 +96,10 @@ class Game:
             self.banker.award_hand_value(self.player)
 
     def setup_new_hand(self):
-        self.player.__init__(self.player.chips)
+        if isinstance(self.player, DatabasePlayer):
+            self.player.__init__(self.player.player_id)
+        elif isinstance(self.player, Player):
+            self.player.__init__(self.player.chips)
         self.player.hand = game.deal()
         self.dealer.__init__(chosen_card_back=game.game_deck.card_back, player_chips=self.dealer.chips)
         self.dealer.hand = game.deal()
@@ -138,6 +145,9 @@ class Game:
         self.player.print_hand()
         self.dealer.reveal_hand()
         self.display_winner()
+        if isinstance(self.banker, DatabaseCage) and isinstance(self.player, DatabasePlayer):
+            self.banker.write_new_account_balance(self.player)
+        # self.banker.write_new_account_balance(self.dealer)
 
     @staticmethod
     def new_hand():
@@ -170,7 +180,7 @@ class Game:
 
 
 if __name__ == '__main__':
-    game = Game()
+    game = Game(use_database=True)
     try:
         game.hand_loop()
     except KeyboardInterrupt:

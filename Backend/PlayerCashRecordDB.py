@@ -9,7 +9,6 @@ class PlayerExistsError(IntegrityError):
     ...
 
 
-# TODO: integrate!
 class PyBlackJackSQLLite(SQLlite3Helper):
     """
     Provides functionalities for managing players and their information in a
@@ -199,6 +198,8 @@ class PyBlackJackSQLLite(SQLlite3Helper):
         :type account_id: int
         :return: None
         """
+
+        self.check_initialization()
         sql_str = f"""update BankAccounts set account_balance = {new_balance} where id = {account_id}"""
         self.Query(sql_str)
         self._connection.commit()

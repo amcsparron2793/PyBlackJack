@@ -280,24 +280,20 @@ class DatabasePlayer(Player):
         self.player_name = None
         self.account_id = None
         self.player_id = player_id
+
         self.db = PyBlackJackSQLLite()
         self.db.GetConnectionAndCursor()
+
         self.get_player()
+
         super().__init__(player_chips=self.account_balance)
 
     def get_player(self):
         player_attrs = self.db.PlayerInfoLookup(self.player_id)
         for name, attr in player_attrs.items():
             setattr(self, name, attr)
-            print(f"{name} : {attr}")
 
-    def write_new_account_balance(self):
-        if self.chips != self.account_balance:
-            self.db.update_player_account_balance(self.chips, self.account_id)
-            self.account_balance = self.chips
-            print(f"New balance: {self.account_balance}")
-        else:
-            print("No change in balance")
+
 
 if __name__ == "__main__":
     p = DatabasePlayer(1)

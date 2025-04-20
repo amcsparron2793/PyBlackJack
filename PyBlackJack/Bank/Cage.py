@@ -35,3 +35,17 @@ class Cage:
         player.chips += (self.hand_value * 2)
         self.hand_value = 0
         return player
+
+
+class DatabaseCage(Cage):
+    def __init__(self, db:'PyBlackJackSQLLite'):
+        super().__init__()
+        self.db = db
+
+    def write_new_account_balance(self, player: 'Player'):
+        if player.chips != player.account_balance:
+            self.db.update_player_account_balance(player.chips, player.account_id)
+            player.account_balance = player.chips
+            print(f"New balance: {player.account_balance}")
+        else:
+            print("No change in balance")
