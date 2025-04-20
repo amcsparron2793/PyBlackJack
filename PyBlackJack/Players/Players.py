@@ -30,6 +30,8 @@ class Player:
     :ivar chips: The total chips the player currently has.
     :type chips: int
     """
+
+    BANKRUPT_BUY_IN_TEXT = "Player is bankrupt. Would you like to buy back in and play again?"
     def __init__(self, player_chips: int = None,):
         self.hand = []
         self.chips = player_chips
@@ -58,7 +60,7 @@ class Player:
         if self.busted:
             pass
         else:
-            if yes_no("Player is bankrupt. Would you like to buy back in and play again?"):
+            if yes_no(Player.BANKRUPT_BUY_IN_TEXT):
                 self.chips = STARTING_CHIPS
                 self.needs_pay_in = True
                 return self.needs_pay_in
