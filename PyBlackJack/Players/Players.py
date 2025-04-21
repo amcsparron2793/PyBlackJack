@@ -1,7 +1,7 @@
 import random
 from os import system
 from Backend import yes_no
-from Backend.settings import STARTING_CHIPS
+from Backend.settings import Settings
 from Backend.PlayerCashRecordDB import PyBlackJackSQLLite, PlayerDoesNotExistError
 
 class Player:
@@ -29,6 +29,7 @@ class Player:
 
     BANKRUPT_BUY_IN_TEXT = "Player is bankrupt. Would you like to buy back in and play again?"
     def __init__(self, player_chips: int = None,):
+        self.settings = Settings()
         self.hand = []
         self.chips = player_chips
         self.last_move = None
@@ -55,7 +56,7 @@ class Player:
             pass
         else:
             if yes_no(Player.BANKRUPT_BUY_IN_TEXT):
-                self.chips = STARTING_CHIPS
+                self.chips = self.settings.starting_chips
                 self.needs_pay_in = True
                 return self.needs_pay_in
 

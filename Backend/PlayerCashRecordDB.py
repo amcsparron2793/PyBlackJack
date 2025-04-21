@@ -1,6 +1,6 @@
 from sqlite3 import DatabaseError, OperationalError, IntegrityError
 
-import Backend.ConfigFunctions as cf
+from Backend.settings import Settings
 from SQLLite3HelperClass import SQLlite3Helper
 from pathlib import Path
 
@@ -32,15 +32,14 @@ class PyBlackJackSQLLite(SQLlite3Helper):
     """
     NEW_PLAYER_DICT_KEYS = ['fname', 'lname']
 
-    def __init__(self, db_file_path: str = None, config: cf.PyBlackJackConfig = None):
+    def __init__(self, db_file_path: str = None):
+        self.settings = Settings()
         self._db_initialized = None
-        self.config = config or cf.PyBlackJackConfig(config_filename=cf.DEFAULT_CONFIG_LOCATION.name,
-                              config_dir=cf.DEFAULT_CONFIG_LOCATION.parent)
-        self.config.GetConfig()
 
-        self.db_file_path = db_file_path or Path(self.config.get('DEFAULT', 'db_file_path'))
-        self.setup_database_script_path = Path(self.config.get('DEFAULT', 'setup_database_script_path'))
-        self.setup_new_player_script_path = Path(self.config.get('DEFAULT', 'setup_new_player_script_path'))
+
+        self.db_file_path = db_file_path or Path(self.settings.db_file_path)
+        self.setup_database_script_path = Path(self.settings.setup_database_script_path)
+        self.setup_new_player_script_path = Path(self.settings.setup_new_player_script_path)
 
         super().__init__(self.db_file_path)
         if self.db_file_path.exists() and not isinstance(self.db_file_path, Path):

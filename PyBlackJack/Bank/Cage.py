@@ -1,4 +1,4 @@
-from Backend.settings import STARTING_CHIPS
+from Backend.settings import Settings
 
 
 class Cage:
@@ -16,9 +16,10 @@ class Cage:
     CHIP_VALUES = [5, 15, 25, 50]
     def __init__(self):
         self.hand_value: int = 0
+        self.settings = Settings()
 
     def pay_in(self, player: 'Player'):
-        player.chips = STARTING_CHIPS
+        player.chips = self.settings.starting_chips
         return player
 
     def take_bet(self, player: 'Player'):
