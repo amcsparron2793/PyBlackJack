@@ -9,7 +9,7 @@ from Bank.Cage import Cage, DatabaseCage
 from Backend.PlayerCashRecordDB import PyBlackJackSQLLite
 
 
-# TODO: add Settings class
+# TODO: add Settings class usage
 class Game:
     def __init__(self, use_database=False, **kwargs):
         self.game_deck = Deck()

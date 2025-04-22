@@ -1,7 +1,7 @@
 import itertools
 import random
 
-
+# TODO: use settings class
 class EmptyShoeError(BaseException):
     """
     Exception raised when attempting to interact with an empty shoe in a card game or similar context.
