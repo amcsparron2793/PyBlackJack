@@ -13,12 +13,24 @@ from Backend.PlayerCashRecordDB import PyBlackJackSQLLite
 
 class Game:
     def __init__(self, use_database=False, **kwargs):
-        self.game_settings = kwargs.get('game_settings', Settings())
+        self.banker = None
+        self.player = None
+        self.db = None
+        self.dealer = None
+        self.game_deck = None
+        self.use_database = use_database
 
+        self.game_settings = kwargs.get('game_settings', Settings())
+        # TODO: add player select/add options
+        self._initialize_game(**kwargs)
+
+        self._start_screen()
+
+    def _initialize_game(self, **kwargs):
         self.game_deck = Deck(settings=self.game_settings)
         self.game_deck.shuffle_deck()
 
-        if not use_database:
+        if not self.use_database:
             self.banker = Cage(settings=self.game_settings)
             self.player = Player(settings=self.game_settings)
         else:
@@ -31,13 +43,20 @@ class Game:
         self.banker.pay_in(self.player)
         self.banker.pay_in(self.dealer)
 
-    @staticmethod
-    def start_screen():
+    def play(self):
+        try:
+            self.hand_loop()
+        except KeyboardInterrupt:
+            print("Ok Quitting")
+            exit(-1)
+
+    def _start_screen(self):
         while True:
             system('cls')
             print("Welcome to PyBlackJack!")
             if yes_no("Ready to play?"):
                 system('cls')
+                self.play()
                 break
             else:
                 print("Ok, goodbye!")
@@ -118,9 +137,9 @@ class Game:
             self.player.__init__(self.player.player_id)
         elif isinstance(self.player, Player):
             self.player.__init__(self.player.chips)
-        self.player.hand = game.deal()
-        self.dealer.__init__(chosen_card_back=game.game_deck.card_back, player_chips=self.dealer.chips)
-        self.dealer.hand = game.deal()
+        self.player.hand = self.deal()
+        self.dealer.__init__(chosen_card_back=self.game_deck.card_back, player_chips=self.dealer.chips)
+        self.dealer.hand = self.deal()
         self.dealer.hidden_hand_setup()
 
     def hand_loop(self):
@@ -201,9 +220,5 @@ class Game:
 
 if __name__ == '__main__':
     game = Game(use_database=True)
-    game.start_screen()
-    try:
-        game.hand_loop()
-    except KeyboardInterrupt:
-        print("Ok Quitting")
-        exit(-1)
+    game.play()
+
