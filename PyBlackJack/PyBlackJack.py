@@ -3,24 +3,27 @@
 PyBlackJack
 """
 from os import system
+from Backend.settings import Settings
 from Deck.DeckOfCards import Deck
 from Players.Players import Player, Dealer, DatabasePlayer
 from Bank.Cage import Cage, DatabaseCage
 from Backend.PlayerCashRecordDB import PyBlackJackSQLLite
 
 
-# TODO: add Settings class usage
 class Game:
     def __init__(self, use_database=False, **kwargs):
-        self.game_deck = Deck()
+        self.game_settings = kwargs.get('game_settings', Settings())
+
+        self.game_deck = Deck(settings=self.game_settings)
         self.game_deck.shuffle_deck()
+
         if not use_database:
-            self.banker = Cage()
-            self.player = Player()
+            self.banker = Cage(settings=self.game_settings)
+            self.player = Player(settings=self.game_settings)
         else:
-            self.db = kwargs.get('db', PyBlackJackSQLLite())
-            self.banker = DatabaseCage(self.db)
-            self.player = DatabasePlayer(kwargs.get('player_id', 1))
+            self.db = kwargs.get('db', PyBlackJackSQLLite(settings=self.game_settings))
+            self.banker = DatabaseCage(self.db, settings=self.game_settings)
+            self.player = DatabasePlayer(kwargs.get('player_id', 1), settings=self.game_settings)
 
         self.dealer = Dealer(chosen_card_back=self.game_deck.card_back)
         # initialize player chips and dealer chips

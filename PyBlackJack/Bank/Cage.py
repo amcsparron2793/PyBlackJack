@@ -14,9 +14,9 @@ class Cage:
     :cvar CHIP_VALUES: The list of predefined chip values available in the game.
     """
     CHIP_VALUES = [5, 15, 25, 50]
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.hand_value: int = 0
-        self.settings = Settings()
+        self.settings = kwargs.get('settings', Settings())
 
     def pay_in(self, player: 'Player'):
         player.chips = self.settings.starting_chips
@@ -39,8 +39,8 @@ class Cage:
 
 
 class DatabaseCage(Cage):
-    def __init__(self, db:'PyBlackJackSQLLite'):
-        super().__init__()
+    def __init__(self, db:'PyBlackJackSQLLite', **kwargs):
+        super().__init__(**kwargs)
         self.db = db
 
     def write_new_account_balance(self, player: 'Player'):

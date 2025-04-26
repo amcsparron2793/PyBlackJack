@@ -1,6 +1,9 @@
 import itertools
 import random
 
+from Backend.settings import Settings
+
+
 # TODO: use settings class
 class EmptyShoeError(BaseException):
     """
@@ -52,10 +55,12 @@ class Cards:
     UNICODE_CARD_BACK = '\U0001F0A0'
     PLAINTEXT_CARD_BACK = 'xxxx'
 
-    def __init__(self, use_unicode=True, card_back: str = None):
-        self.card_back = card_back
+    def __init__(self, ** kwargs):#, use_unicode=True, card_back: str = None):
+        self.settings = kwargs.pop('settings', Settings())
+        # noinspection PyTypeChecker
+        self.card_back = kwargs.get('card_back', None)
 
-        if use_unicode:
+        if self.settings.use_unicode_cards:
             if self.card_back is None:
                 # three leading zeros made this code work
                 self.card_back = Cards.UNICODE_CARD_BACK
@@ -82,10 +87,15 @@ class Deck(Cards):
     :type deck: list
     """
 
-    SHOE_RUNOUT_WARNING_THRESHOLD = 15
+    DEFAULT_SHOE_RUNOUT_WARNING_THRESHOLD = 15
     def __init__(self, *args, **kwargs):
+        self.settings = kwargs.pop('settings', Settings())
+        self.shoe_runout_warning_threshold = kwargs.pop('shoe_runout_warning_threshold',
+                                                        self.settings.shoe_runout_warning_threshold)
+                                                        #Deck.DEFAULT_SHOE_RUNOUT_WARNING_THRESHOLD)
         super().__init__(*args, **kwargs)
         self.deck = list(itertools.product(self.value, self.suit))
+
 
     def shuffle_deck(self):
         """
@@ -113,7 +123,7 @@ class Deck(Cards):
         :raises EmptyShoeError: If the deck has run out of cards.
         :return: The top card of the deck.
         """
-        if len(self.deck) <= Deck.SHOE_RUNOUT_WARNING_THRESHOLD:
+        if len(self.deck) <= self.shoe_runout_warning_threshold:
             print(f"{len(self.deck)} cards left to draw from.")
         if len(self.deck) <= 0:
             raise EmptyShoeError("Deck has run out of cards")

@@ -32,8 +32,8 @@ class PyBlackJackSQLLite(SQLlite3Helper):
     """
     NEW_PLAYER_DICT_KEYS = ['fname', 'lname']
 
-    def __init__(self, db_file_path: str = None):
-        self.settings = Settings()
+    def __init__(self, db_file_path: str = None, **kwargs):
+        self.settings = kwargs.get('settings', Settings())
         self._db_initialized = None
 
 

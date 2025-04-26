@@ -5,7 +5,7 @@ from BetterConfigAJM import BetterConfigAJM
 
 class Settings:
     GAME_ROOT_FOLDER = Path(__file__).parent.parent
-    DEFAULT_CONFIG_LOCATION = Path(GAME_ROOT_FOLDER, 'cfg/sqliteDB_config.ini')
+    DEFAULT_CONFIG_LOCATION = Path(GAME_ROOT_FOLDER, 'cfg/PyBlackjackConfig.ini')
     def __init__(self, config=None):
         self.starting_chips = 250
         self.config = config or PyBlackJackConfig(config_filename=Settings.DEFAULT_CONFIG_LOCATION.name,
@@ -18,6 +18,8 @@ class Settings:
                                                                'setup_database_script_path'))
         self.setup_new_player_script_path = Path(self.config.get('DEFAULT',
                                                                  'setup_new_player_script_path'))
+        self.use_unicode_cards = self.config.getboolean('CARD', 'use_unicode')
+        self.shoe_runout_warning_threshold = self.config.getint('DECK', 'shoe_runout_warning_threshold')
 
 
 class PyBlackJackConfig(BetterConfigAJM):
@@ -33,7 +35,13 @@ class PyBlackJackConfig(BetterConfigAJM):
                         'db_file_path': PyBlackJackConfig.DEFAULT_DB_PATH,
                         'setup_database_script_path': PyBlackJackConfig.SETUP_DATABASE_SCRIPT_PATH,
                         'setup_new_player_script_path': PyBlackJackConfig.SETUP_NEW_PLAYER_SCRIPT_PATH
-                    }
+                    },
+                'CARD':
+                    {
+                        'use_unicode': True,
+                    },
+                'DECK':
+                    {'shoe_runout_warning_threshold': 15}
              }
         ]
         if self.config_list_dict:

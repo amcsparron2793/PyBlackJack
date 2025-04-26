@@ -28,8 +28,9 @@ class Player:
     """
 
     BANKRUPT_BUY_IN_TEXT = "Player is bankrupt. Would you like to buy back in and play again?"
-    def __init__(self, player_chips: int = None,):
-        self.settings = Settings()
+    def __init__(self, player_chips: int = None, **kwargs):
+        # TODO: implement more?
+        self.settings = kwargs.get('settings', Settings())
         self.hand = []
         self.chips = player_chips
         self.last_move = None
@@ -273,7 +274,8 @@ class DatabasePlayer(Player):
     :ivar db: The database connection and cursor object for managing database operations.
     :type db: PyBlackJackSQLLite
     """
-    def __init__(self, player_id):
+    def __init__(self, player_id, **kwargs):
+        self.settings = kwargs.get('settings', Settings())
         self.account_balance = None
         self.player_name = None
         self.account_id = None
