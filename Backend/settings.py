@@ -20,6 +20,8 @@ class Settings:
                                                                  'setup_new_player_script_path'))
         self.use_unicode_cards = self.config.getboolean('CARD', 'use_unicode')
         self.shoe_runout_warning_threshold = self.config.getint('DECK', 'shoe_runout_warning_threshold')
+        self.use_database = self.config.getboolean('DEFAULT', 'use_database')
+        self.player_name = self.config.get('DEFAULT', 'player_name')
 
 
 class PyBlackJackConfig(BetterConfigAJM):
@@ -34,7 +36,9 @@ class PyBlackJackConfig(BetterConfigAJM):
                     {
                         'db_file_path': PyBlackJackConfig.DEFAULT_DB_PATH,
                         'setup_database_script_path': PyBlackJackConfig.SETUP_DATABASE_SCRIPT_PATH,
-                        'setup_new_player_script_path': PyBlackJackConfig.SETUP_NEW_PLAYER_SCRIPT_PATH
+                        'setup_new_player_script_path': PyBlackJackConfig.SETUP_NEW_PLAYER_SCRIPT_PATH,
+                        'use_database': False,
+                        'player_name': None
                     },
                 'CARD':
                     {

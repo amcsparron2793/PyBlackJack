@@ -4,6 +4,7 @@ from Backend import yes_no
 from Backend.settings import Settings
 from Backend.PlayerCashRecordDB import PyBlackJackSQLLite, PlayerDoesNotExistError
 
+
 class Player:
     """
     Represents a player in a card game.
@@ -28,6 +29,7 @@ class Player:
     """
 
     BANKRUPT_BUY_IN_TEXT = "Player is bankrupt. Would you like to buy back in and play again?"
+
     def __init__(self, player_chips: int = None, **kwargs):
         # TODO: implement more?
         self.settings = kwargs.get('settings', Settings())
@@ -167,6 +169,7 @@ class Dealer(Player):
                        intentionally hidden.
     :type hidden_hand: list
     """
+
     def __init__(self, chosen_card_back, player_chips: int = None):
         super().__init__(player_chips)
         self.hidden_hand = []
@@ -270,16 +273,19 @@ class DatabasePlayer(Player):
     :ivar account_id: The unique identifier for the player's account.
     :type account_id: Optional[int]
     :ivar player_id: The unique identifier for the player, used to query the database.
-    :type player_id: int
+    :type player_id: Optional[int]
     :ivar db: The database connection and cursor object for managing database operations.
     :type db: PyBlackJackSQLLite
     """
-    def __init__(self, player_id, **kwargs):
+
+    def __init__(self, player_id=None, player_name=None, **kwargs):
         self.settings = kwargs.get('settings', Settings())
         self.account_balance = None
-        self.player_name = None
+        self.player_name = player_name
         self.account_id = None
         self.player_id = player_id
+        if all([self.player_id, self.player_name]):
+            raise AttributeError("Cannot initialize with both player_id and player_name.")
 
         self.db = PyBlackJackSQLLite()
         self.db.GetConnectionAndCursor()
@@ -296,9 +302,19 @@ class DatabasePlayer(Player):
             return super().player_display_name
 
     def get_player(self):
+        if not self.player_id:
+            if self.player_name:
+                self.player_id = self.db.PlayerIDLookup(player_first_name=self.player_name.split()[0].capitalize(),
+                                                        player_last_name=self.player_name.split()[1].capitalize())
+            else:
+                fn = self._get_new_player_name('first')
+                ln = self._get_new_player_name('last')
+                self.player_id = self.db.PlayerIDLookup(player_first_name=fn.capitalize(),
+                                                        player_last_name=ln.capitalize())
+
         player_attrs = self.db.PlayerInfoLookup(self.player_id)
         if not player_attrs:
-            np_dict =  self.build_player_dict()
+            np_dict = self.build_player_dict()
             np_id = self.db.new_player_setup(np_dict)
             self.player_id = np_id
             player_attrs = self.db.PlayerInfoLookup(self.player_id)
@@ -327,8 +343,6 @@ class DatabasePlayer(Player):
             return {self.db.NEW_PLAYER_DICT_KEYS[0]: fn, self.db.NEW_PLAYER_DICT_KEYS[1]: ln}
         else:
             raise PlayerDoesNotExistError("Player does not exist in database.")
-
-
 
 
 if __name__ == "__main__":

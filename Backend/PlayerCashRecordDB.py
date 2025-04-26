@@ -23,8 +23,6 @@ class PyBlackJackSQLLite(SQLlite3Helper):
     It is tightly coupled with the `PyBlackJackConfig` class, from which it sources
     configuration details such as database file paths and script paths.
 
-    :ivar config: Configuration object used to retrieve settings and paths for the database.
-    :type config: PyBlackJackConfig
     :ivar setup_database_script_path: Path to the SQL script used for setting up the database.
     :type setup_database_script_path: Path
     :ivar setup_new_player_script_path: Path to the SQL script for adding a new player to the database.
@@ -164,6 +162,9 @@ class PyBlackJackSQLLite(SQLlite3Helper):
             return None
 
     def PlayerInfoLookup(self, player_id):
+        def _no_pid(pid):
+            print(f"Player with ID {pid} not found in database.")
+            return None
         """
         Looks up player information in the database and retrieves corresponding player
         and bank account details based on the provided player ID. Ensures initialization
@@ -184,13 +185,13 @@ class PyBlackJackSQLLite(SQLlite3Helper):
                               f" AccountID as account_id, account_balance as account_balance "
                               f"from PlayerBanksFull where PlayerID = {player_id}")
         if not player_id:
-            raise ValueError("player_id must be provided to perform a lookup.")
+            return _no_pid(player_id)
         self.Query(bank_account_query)
         if self.query_results:
             return self.list_dict_results[0]
         else:
-            print(f"Player with ID {player_id} not found in database.")
-            return None
+            return _no_pid(player_id)
+
 
     def update_player_account_balance(self, new_balance: int, account_id: int):
         """

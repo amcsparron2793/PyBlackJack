@@ -12,21 +12,25 @@ from Backend.PlayerCashRecordDB import PyBlackJackSQLLite
 
 
 class Game:
-    def __init__(self, use_database=False, **kwargs):
+    def __init__(self, **kwargs):
         self.banker = None
         self.player = None
         self.db = None
         self.dealer = None
         self.game_deck = None
-        self.use_database = use_database
 
         self.game_settings = kwargs.get('game_settings', Settings())
-        # TODO: add player select/add options
-        self._initialize_game(**kwargs)
 
         self._start_screen()
 
+        self._initialize_game(**kwargs)
+
+
     def _initialize_game(self, **kwargs):
+        self.use_database = kwargs.get('use_database', self.game_settings.use_database)
+        self.player_name = kwargs.get('player_name', self.game_settings.player_name)
+        print(self.player_name)
+        self.player_id = kwargs.get('player_id', None)
         self.game_deck = Deck(settings=self.game_settings)
         self.game_deck.shuffle_deck()
 
@@ -36,7 +40,9 @@ class Game:
         else:
             self.db = kwargs.get('db', PyBlackJackSQLLite(settings=self.game_settings))
             self.banker = DatabaseCage(self.db, settings=self.game_settings)
-            self.player = DatabasePlayer(kwargs.get('player_id', 1), settings=self.game_settings)
+            self.player = DatabasePlayer(player_id=self.player_id,
+                                         player_name=self.player_name,
+                                         settings=self.game_settings)
 
         self.dealer = Dealer(chosen_card_back=self.game_deck.card_back)
         # initialize player chips and dealer chips
@@ -50,13 +56,13 @@ class Game:
             print("Ok Quitting")
             exit(-1)
 
-    def _start_screen(self):
+    @staticmethod
+    def _start_screen():
         while True:
             system('cls')
             print("Welcome to PyBlackJack!")
             if yes_no("Ready to play?"):
                 system('cls')
-                self.play()
                 break
             else:
                 print("Ok, goodbye!")
