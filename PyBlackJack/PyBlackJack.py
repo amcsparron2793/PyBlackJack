@@ -7,6 +7,7 @@ from Backend.settings import Settings
 from Deck.DeckOfCards import Deck
 from Players.Players import Player, Dealer, DatabasePlayer
 from Bank.Cage import Cage, DatabaseCage
+from Backend import yes_no
 from Backend.PlayerCashRecordDB import PyBlackJackSQLLite
 
 
@@ -29,6 +30,18 @@ class Game:
         # initialize player chips and dealer chips
         self.banker.pay_in(self.player)
         self.banker.pay_in(self.dealer)
+
+    @staticmethod
+    def start_screen():
+        while True:
+            system('cls')
+            print("Welcome to PyBlackJack!")
+            if yes_no("Ready to play?"):
+                system('cls')
+                break
+            else:
+                print("Ok, goodbye!")
+                exit(0)
 
     def deal(self):
         hand = [self.game_deck.draw(), self.game_deck.draw()]
@@ -188,6 +201,7 @@ class Game:
 
 if __name__ == '__main__':
     game = Game(use_database=True)
+    game.start_screen()
     try:
         game.hand_loop()
     except KeyboardInterrupt:
