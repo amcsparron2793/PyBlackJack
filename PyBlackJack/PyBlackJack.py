@@ -29,7 +29,6 @@ class Game:
     def _initialize_game(self, **kwargs):
         self.use_database = kwargs.get('use_database', self.game_settings.use_database)
         self.player_name = kwargs.get('player_name', self.game_settings.player_name)
-        print(self.player_name)
         self.player_id = kwargs.get('player_id', None)
         self.game_deck = Deck(settings=self.game_settings)
         self.game_deck.shuffle_deck()
