@@ -37,15 +37,15 @@ class PyBlackJackConfig(BetterConfigAJM):
                         'db_file_path': PyBlackJackConfig.DEFAULT_DB_PATH,
                         'setup_database_script_path': PyBlackJackConfig.SETUP_DATABASE_SCRIPT_PATH,
                         'setup_new_player_script_path': PyBlackJackConfig.SETUP_NEW_PLAYER_SCRIPT_PATH,
-                        'use_database': False,
-                        'player_name': None
+                        'use_database': 'False',
+                        'player_name': ''
                     },
                 'CARD':
                     {
-                        'use_unicode': True,
+                        'use_unicode': 'True',
                     },
                 'DECK':
-                    {'shoe_runout_warning_threshold': 15}
+                    {'shoe_runout_warning_threshold': '15'}
              }
         ]
         if self.config_list_dict:
