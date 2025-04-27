@@ -192,7 +192,6 @@ class PyBlackJackSQLLite(SQLlite3Helper):
         else:
             return _no_pid(player_id)
 
-
     def update_player_account_balance(self, new_balance: int, account_id: int):
         """
         Updates the player's account balance to the specified value in the database. This method
@@ -212,7 +211,9 @@ class PyBlackJackSQLLite(SQLlite3Helper):
         self._connection.commit()
         print(f'updated BankAccount ID {account_id} with new balance ({new_balance}).')
 
-
+    def add_bankruptcy(self):
+        # TODO: add bankruptcy to a 'player bankruptcies' table
+        ...
 
 
 # TODO: add to db (add player and bank account) and query for preexisting players

@@ -294,6 +294,10 @@ class DatabasePlayer(Player):
 
         super().__init__(player_chips=self.account_balance)
 
+    def bankrupt(self):
+        # TODO
+        super().bankrupt()
+
     @property
     def player_display_name(self):
         if issubclass(self.__class__, DatabasePlayer):
