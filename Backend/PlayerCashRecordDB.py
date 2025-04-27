@@ -186,12 +186,20 @@ class PyBlackJackSQLLite(SQLlite3Helper):
                               f"from PlayerBanksFull where PlayerID = {player_id}")
         if not player_id:
             return _no_pid(player_id)
+
         self.Query(bank_account_query)
+
         if self.query_results:
             return self.list_dict_results[0]
         else:
             return _no_pid(player_id)
 
+    def GetPlayerPasswordHash(self, player_id):
+        self.Query(f"select hash from PlayerHashes where player_id = {player_id}")
+        if self.query_results:
+            return self.query_results[0][0]
+        else:
+            raise PlayerDoesNotExistError(f"Player with ID {player_id} does not exist in database.")
 
     def update_player_account_balance(self, new_balance: int, account_id: int):
         """

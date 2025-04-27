@@ -47,3 +47,10 @@ create table LastGamePlayed(
     date_of_game datetime not null,
      foreign key(player_id)
         references Players(id));
+
+create table PlayerHashes
+(
+    id integer primary key autoincrement,
+    hash text(64) unique not null,
+    player_id int references Players (id) unique not null
+);
