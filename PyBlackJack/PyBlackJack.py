@@ -55,17 +55,31 @@ class Game:
             print("Ok Quitting")
             exit(-1)
 
-    @staticmethod
-    def _start_screen():
+    def _get_suits_string(self):
+        if self.game_settings.use_unicode_cards:
+            suits = Deck.UNICODE_SUITS
+        else:
+            suits = ''
+        suits_string = ''
+
+        for x in suits:
+            suits_string += f"{x} "
+        return suits_string
+
+    def _start_screen(self):
         while True:
             system('cls')
-            print("Welcome to PyBlackJack!")
-            if yes_no("Ready to play?"):
-                system('cls')
-                break
-            else:
-                print("Ok, goodbye!")
-                exit(0)
+            print(f"{self._get_suits_string() * 4} Welcome to PyBlackJack! {self._get_suits_string() * 4}")
+            try:
+                if yes_no("Ready to play?"):
+                    system('cls')
+                    break
+                else:
+                    print("Ok, goodbye!")
+                    exit(0)
+            except KeyboardInterrupt:
+                print("Ok Quitting")
+                exit(-1)
 
     def deal(self):
         hand = [self.game_deck.draw(), self.game_deck.draw()]
@@ -224,6 +238,6 @@ class Game:
 
 
 if __name__ == '__main__':
-    game = Game(use_database=True)
+    game = Game()
     game.play()
 
