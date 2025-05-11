@@ -40,8 +40,6 @@ class Player:
         self.bet_amount: int = 0
         self.has_bet = False
         self.needs_pay_in = False
-        if isinstance(self.chips, int) and self.chips == 0:
-            self.bankrupt()
 
     def bankrupt(self):
         """
