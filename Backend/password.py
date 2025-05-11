@@ -32,7 +32,7 @@ class PasswordValidator:
         self._player_id = player_id
         self.sql = sql
         self._player_hash = None
-        self._is_validated = None
+        self._is_validated = False
     # TODO: add in create hash on player create
 
     @property
@@ -49,7 +49,9 @@ class PasswordValidator:
     @property
     def is_validated(self):
         if not self._is_validated:
-            self._is_validated =  sha256(getpass.getpass().encode()).hexdigest() == self.player_hash
+            get_pass_string = f'Please Enter Password for player id {self.player_id}: '
+            candidate_password = getpass.getpass(prompt=get_pass_string)
+            self._is_validated =  sha256(candidate_password.encode()).hexdigest() == self.player_hash
         return self._is_validated
 
 

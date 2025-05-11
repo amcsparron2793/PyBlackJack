@@ -1,6 +1,7 @@
 import random
 from os import system
 from Backend import yes_no
+from Backend.password import PasswordValidator
 from Backend.settings import Settings
 from Backend.PlayerCashRecordDB import PyBlackJackSQLLite, PlayerDoesNotExistError
 
@@ -280,6 +281,7 @@ class DatabasePlayer(Player):
         self.settings = kwargs.get('settings', Settings())
         self.account_balance = None
         self.player_name = player_name
+        self._player_unlocked = False
         self.account_id = None
         self.player_id = player_id
         if all([self.player_id, self.player_name]):
@@ -303,6 +305,17 @@ class DatabasePlayer(Player):
         else:
             return super().player_display_name
 
+    @property
+    def player_unlocked(self):
+        if not self._player_unlocked:
+            pwv = PasswordValidator(self.player_id, self.db)
+            if pwv.is_validated:
+                self._player_unlocked = True
+            else:
+                self._player_unlocked = False
+        return self._player_unlocked
+
+
     def get_player(self):
         if not self.player_id:
             if self.player_name:
@@ -320,6 +333,13 @@ class DatabasePlayer(Player):
             np_id = self.db.new_player_setup(np_dict)
             self.player_id = np_id
             player_attrs = self.db.PlayerInfoLookup(self.player_id)
+
+        # FIXME: this prompts twice for password...
+        if self.player_unlocked:
+            print(f"Password accepted for player {self.player_name}.")
+        else:
+            # TODO: make this a better exception etc
+            raise Exception("Player is locked.")
 
         for name, attr in player_attrs.items():
             setattr(self, name, attr)
