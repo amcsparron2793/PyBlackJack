@@ -15,3 +15,6 @@ values(
        (select max(id) from Players),
        (select max(id) from BankAccounts)
        );
+
+insert into PlayerBankruptcies(player_id)
+select max(id) from Players;

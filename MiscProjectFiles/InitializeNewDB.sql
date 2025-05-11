@@ -47,3 +47,10 @@ create table LastGamePlayed(
     date_of_game datetime not null,
      foreign key(player_id)
         references Players(id));
+
+create table PlayerBankruptcies(
+    id integer primary key autoincrement not null,
+    player_id integer not null,
+    total_bankruptcies integer not null default 0,
+    foreign key(player_id)
+        references Players(id));
