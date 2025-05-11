@@ -295,7 +295,7 @@ class DatabasePlayer(Player):
         super().__init__(player_chips=self.account_balance)
 
     def bankrupt(self):
-        # TODO
+        self.db.add_bankruptcy(self.player_id)
         super().bankrupt()
 
     @property

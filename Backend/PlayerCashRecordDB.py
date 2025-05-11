@@ -211,10 +211,13 @@ class PyBlackJackSQLLite(SQLlite3Helper):
         self._connection.commit()
         print(f'updated BankAccount ID {account_id} with new balance ({new_balance}).')
 
-    def add_bankruptcy(self):
-        # TODO: add bankruptcy to a 'player bankruptcies' table
-        ...
-
+    def add_bankruptcy(self, player_id: int):
+        sql_query = f"""update PlayerBankruptcies 
+                        set total_bankruptcies = (total_bankruptcies + 1) 
+                        where player_id = {player_id}"""
+        self.Query(sql_query)
+        self._connection.commit()
+        self._logger.debug(f'bankruptcy added to player {player_id}')
 
 # TODO: add to db (add player and bank account) and query for preexisting players
 
