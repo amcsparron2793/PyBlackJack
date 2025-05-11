@@ -2,6 +2,7 @@ from logging import Logger
 from typing import List
 from pathlib import Path
 from BetterConfigAJM import BetterConfigAJM
+from pygame import font
 
 class Settings:
     GAME_ROOT_FOLDER = Path(__file__).parent.parent
@@ -23,6 +24,7 @@ class Settings:
         self.use_database = self.config.getboolean('DEFAULT', 'use_database')
         self.player_name = self.config.get('DEFAULT', 'player_name')
 
+
 class PyGameSettings(Settings):
     GREEN_RGB = (0, 128, 0)
     def __init__(self, config=None):
@@ -30,6 +32,8 @@ class PyGameSettings(Settings):
         self.bg_color = self.config.get('PYGAME', 'bg_color')
         self.screen_size = (self.config.getint('PYGAME', 'screen_size_width'),
                             self.config.getint('PYGAME', 'screen_size_height'))
+        self.font = font.Font(None, 36)
+
 
 
 class PyBlackJackConfig(BetterConfigAJM):
