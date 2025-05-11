@@ -23,11 +23,21 @@ class Settings:
         self.use_database = self.config.getboolean('DEFAULT', 'use_database')
         self.player_name = self.config.get('DEFAULT', 'player_name')
 
+class PyGameSettings(Settings):
+    GREEN_RGB = (0, 128, 0)
+    def __init__(self, config=None):
+        super().__init__(config)
+        self.bg_color = self.config.get('PYGAME', 'bg_color')
+        self.screen_size = (self.config.getint('PYGAME', 'screen_size_width'),
+                            self.config.getint('PYGAME', 'screen_size_height'))
+
 
 class PyBlackJackConfig(BetterConfigAJM):
     DEFAULT_DB_PATH = Path(Settings.GAME_ROOT_FOLDER, 'MiscProjectFiles/PyBlackJack.db')
     SETUP_DATABASE_SCRIPT_PATH = Path(Settings.GAME_ROOT_FOLDER, 'MiscProjectFiles/InitializeNewDB.sql')
     SETUP_NEW_PLAYER_SCRIPT_PATH = Path(Settings.GAME_ROOT_FOLDER, 'MiscProjectFiles/NewPlayerSetup.sql')
+    DEFAULT_SCREEN_SIZE = (800, 600)
+
     def __init__(self, config_filename, config_dir, config_list_dict: List[dict] = None, logger: Logger = None):
         super().__init__(config_filename, config_dir, config_list_dict, logger)
         self.default_config = [
@@ -45,7 +55,13 @@ class PyBlackJackConfig(BetterConfigAJM):
                         'use_unicode': 'True',
                     },
                 'DECK':
-                    {'shoe_runout_warning_threshold': '15'}
+                    {'shoe_runout_warning_threshold': '15'},
+                'PYGAME':
+                    {
+                        'bg_color': PyGameSettings.GREEN_RGB,
+                        'screen_size_width': PyBlackJackConfig.DEFAULT_SCREEN_SIZE[0],
+                        'screen_size_height': PyBlackJackConfig.DEFAULT_SCREEN_SIZE[1]
+                    }
              }
         ]
         if self.config_list_dict:

@@ -2,8 +2,11 @@
 """
 PyBlackJack
 """
+
+import pygame
+
 from os import system
-from Backend.settings import Settings
+from Backend.settings import Settings, PyGameSettings
 from Deck.DeckOfCards import Deck
 from Players.Players import Player, Dealer, DatabasePlayer
 from Bank.Cage import Cage, DatabaseCage
@@ -42,7 +45,7 @@ class Game:
 
         self.game_settings = kwargs.get('game_settings', Settings())
 
-        self._start_screen()
+        #self._start_screen()
 
         self._initialize_game(**kwargs)
 
@@ -427,7 +430,46 @@ class Game:
         return player
 
 
+class PyGameBlackJack(Game):
+    def __init__(self, **kwargs):
+        self.game_settings = kwargs.pop('game_settings', PyGameSettings())
+        pygame.init()
+        self.screen = pygame.display.set_mode(size=self.game_settings.screen_size)
+        pygame.display.set_caption("PyBlackJack")
+        self.clock = pygame.time.Clock()
+
+        self.running = True
+        super().__init__(game_settings=self.game_settings, **kwargs)
+
+        # FIXME: This is a hacky workaround - need to figure out how to easily parse tuples from config
+        self.game_settings.bg_color = PyGameSettings.GREEN_RGB
+
+    def _keydown_events(self, event):
+        if event.key == pygame.K_SPACE:
+            print("space")
+            # self.play()
+        elif event.key == pygame.K_ESCAPE:
+            self.running = False
+
+    def check_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            elif event.type == pygame.KEYDOWN:
+                self._keydown_events(event)
+
+    def run_game(self):
+        while self.running:
+            self.check_events()
+            self.screen.fill(self.game_settings.bg_color)
+            pygame.display.flip()
+            self.clock.tick(60)
+
+        pygame.quit()
+        exit()
+
 if __name__ == '__main__':
-    game = Game()
-    game.play()
+    game = PyGameBlackJack()#Game()
+    game.run_game()
+    # game.play()
 
