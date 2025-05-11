@@ -40,8 +40,6 @@ class Player:
         self.bet_amount: int = 0
         self.has_bet = False
         self.needs_pay_in = False
-        if isinstance(self.chips, int) and self.chips == 0:
-            self.bankrupt()
 
     def bankrupt(self):
         """
@@ -293,6 +291,10 @@ class DatabasePlayer(Player):
         self.get_player()
 
         super().__init__(player_chips=self.account_balance)
+
+    def bankrupt(self):
+        self.db.add_bankruptcy(self.player_id)
+        super().bankrupt()
 
     @property
     def player_display_name(self):
