@@ -431,6 +431,11 @@ class Game:
 
 
 class PyGameBlackJack(Game):
+    START = "START"
+    PLAYING = "PLAYING"
+    GAME_OVER = "GAME_OVER"
+    GAME_STATES = [START, PLAYING, GAME_OVER]
+
     def __init__(self, **kwargs):
         self.game_settings = kwargs.pop('game_settings', PyGameSettings())
         pygame.init()
@@ -443,33 +448,129 @@ class PyGameBlackJack(Game):
 
         # FIXME: This is a hacky workaround - need to figure out how to easily parse tuples from config
         self.game_settings.bg_color = PyGameSettings.GREEN_RGB
+        self.font = pygame.font.Font(None, 36)
+        self.state = PyGameBlackJack.START  # Game states: START, PLAYING, GAME_OVER
 
     def _keydown_events(self, event):
         if event.key == pygame.K_SPACE:
             print("space")
             # self.play()
         elif event.key == pygame.K_ESCAPE:
-            self.running = False
+            # self.running = False
+            self.state = PyGameBlackJack.GAME_OVER
+        elif event.key == pygame.K_h:  # Example: Player hits
+            print("Player hits (logic under development)")
+        elif event.key == pygame.K_s:  # Example: Player stays
+            print("Player stays (logic under development)")
 
     def check_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
+                self.state = PyGameBlackJack.GAME_OVER
             elif event.type == pygame.KEYDOWN:
                 self._keydown_events(event)
 
-    def run_game(self):
+    def _start_screen(self):
+        """
+        Render the start screen.
+        """
+        self.screen.fill(self.game_settings.bg_color)  # Black background
+        title_surface = self.font.render("Welcome to PyBlackJack", True, 'WHITE')
+        instruction_surface = self.font.render("Press any key to start", True, 'WHITE')
+
+        # Center text on the screen
+        title_rect = title_surface.get_rect(center=(400, 250))
+        instruction_rect = instruction_surface.get_rect(center=(400, 300))
+
+        self.screen.blit(title_surface, title_rect)
+        self.screen.blit(instruction_surface, instruction_rect)
+        pygame.display.flip()  # Update the screen
+
+        # Wait for the player to press any key to continue
+        self._wait_for_key()
+
+    def _wait_for_key(self):
+        """
+        Wait for a key press to continue.
+        """
+        waiting = True
+        while waiting:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.running = False
+                    waiting = False
+                if event.type == pygame.KEYDOWN:
+                    waiting = False
+
+    def play(self):
+        """
+        Main game loop.
+        """
         while self.running:
+            # Handle game states
+            if self.state == PyGameBlackJack.START:
+                self._start_screen()
+                self.state = PyGameBlackJack.PLAYING  # Transition to the playing state
+
+            elif self.state == PyGameBlackJack.PLAYING:
+                self._game_loop()
+
+            elif self.state == PyGameBlackJack.GAME_OVER:
+                self._game_over_screen()
+                self.running = False  # Exit loop after displaying game over
+
+        self._quit_game()
+
+    def _game_loop(self):
+        """
+        The main game-playing loop.
+        """
+        while self.state == PyGameBlackJack.PLAYING:
+            # Event handling
             self.check_events()
-            self.screen.fill(self.game_settings.bg_color)
-            pygame.display.flip()
+
+            # Update game logic
+            # Add functionality such as checking for a bust, dealer actions, etc.
+
+            # Render game screen
+            self._render_game_screen()
+
+            # Limit frame rate to 60 FPS
             self.clock.tick(60)
 
+    def _render_game_screen(self):
+        """
+        Render the main game playing screen.
+        """
+        self.screen.fill((0, 100, 0))  # Green background for table
+        text_surface = self.font.render(f"Player: {self.player_name}", True, (255, 255, 255))
+        self.screen.blit(text_surface, (10, 10))  # Render player name in the top-left corner
+        pygame.display.flip()  # Update the display
+
+    def _game_over_screen(self):
+        """
+        Display the game over screen.
+        """
+        self.screen.fill((0, 0, 0))  # Black background
+        game_over_surface = self.font.render("Game Over! Press any key to exit.",
+                                             True, (255, 255, 255))
+        game_over_rect = game_over_surface.get_rect(center=(400, 300))
+        self.screen.blit(game_over_surface, game_over_rect)
+        pygame.display.flip()
+        self._wait_for_key()
+
+    def _quit_game(self):
+        """
+        Properly shut down the game.
+        """
         pygame.quit()
         exit()
 
+
+
+
 if __name__ == '__main__':
     game = PyGameBlackJack()#Game()
-    game.run_game()
-    # game.play()
+    game.play()
 
