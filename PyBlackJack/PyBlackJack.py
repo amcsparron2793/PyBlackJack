@@ -447,13 +447,24 @@ class PyGameBlackJack(Game):
 
         self.running = True
 
-        self.state = PyGameBlackJack.START  # Game states: START, PLAYING, GAME_OVER
+        self._state = PyGameBlackJack.START  # Game states: START, PLAYING, GAME_OVER
         self.start_screen = StartScreen(self.game_settings, screen=self.screen)
 
         super().__init__(game_settings=self.game_settings, **kwargs)
 
         # FIXME: This is a hacky workaround - need to figure out how to easily parse tuples from config
         self.game_settings.bg_color = PyGameSettings.GREEN_RGB
+
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, value):
+        if value in PyGameBlackJack.GAME_STATES:
+            self._state = value
+        else:
+            raise ValueError(f"Invalid game state: {value}")
 
     def _keydown_events(self, event):
         if event.key == pygame.K_SPACE:
@@ -538,7 +549,7 @@ class PyGameBlackJack(Game):
         """
         Render the main game playing screen.
         """
-        self.screen.fill((0, 100, 0))  # Green background for table
+        self.screen.fill(self.game_settings.bg_color)  # Green background for table
         text_surface = self.game_settings.font.render(f"Player: {self.player_name}", True, (255, 255, 255))
         self.screen.blit(text_surface, (10, 10))  # Render player name in the top-left corner
         pygame.display.flip()  # Update the display
