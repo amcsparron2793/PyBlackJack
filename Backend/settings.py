@@ -31,15 +31,21 @@ class PyGameSettings(Settings):
     BLACK_RGB = (0, 0, 0)
     def __init__(self, config=None):
         super().__init__(config)
-        self.game_screen_bg_color = self.config.get('PYGAME', 'game_screen_bg_color')
-        self.start_screen_bg_color = self.config.get('PYGAME','start_screen_bg_color')
-        self.game_over_screen_bg_color = self.config.get('PYGAME','game_over_screen_bg_color')
-        self.game_font_color = self.config.get('PYGAME','game_font_color')
+        self.game_screen_bg_color = self.parse_tuple_from_config(self.config.get('PYGAME', 'game_screen_bg_color'))
+        self.start_screen_bg_color = self.parse_tuple_from_config(self.config.get('PYGAME','start_screen_bg_color'))
+        self.game_over_screen_bg_color = self.parse_tuple_from_config(self.config.get('PYGAME','game_over_screen_bg_color'))
+        self.game_font_color = self.parse_tuple_from_config(self.config.get('PYGAME','game_font_color'))
 
         self.screen_size = (self.config.getint('PYGAME', 'screen_size_width'),
                             self.config.getint('PYGAME', 'screen_size_height'))
         self.font = font.Font(None, 36)
 
+    @staticmethod
+    def parse_tuple_from_config(config_value):
+        # Removing parentheses and splitting the string by commas
+        parsed_values = config_value.strip("()").split(",")
+        # Converting each value to an integer and creating a tuple
+        return tuple(map(int, parsed_values))
 
 
 class PyBlackJackConfig(BetterConfigAJM):
