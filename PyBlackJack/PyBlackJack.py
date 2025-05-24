@@ -4,7 +4,7 @@ PyBlackJack
 """
 
 import pygame
-from PyGameBlackJack.StartScreen import StartScreen
+from PyGameBlackJack.StartEndScreen import StartScreen, GameOverScreen
 from os import system
 from Backend.settings import Settings, PyGameSettings
 from Deck.DeckOfCards import Deck
@@ -449,6 +449,7 @@ class PyGameBlackJack(Game):
 
         self._state = PyGameBlackJack.START  # Game states: START, PLAYING, GAME_OVER
         self.start_screen = StartScreen(self.game_settings, screen=self.screen)
+        self.game_over_screen = GameOverScreen(self.game_settings, screen=self.screen)
 
         super().__init__(game_settings=self.game_settings, **kwargs)
 
@@ -558,13 +559,10 @@ class PyGameBlackJack(Game):
         """
         Display the game over screen.
         """
-        self.screen.fill((0, 0, 0))  # Black background
-        # TODO: make this its own thing like startscreen?
-        game_over_surface = self.game_settings.font.render("Game Over! Press any key to exit.",
-                                             True, (255, 255, 255))
-        game_over_rect = game_over_surface.get_rect(center=(400, 300))
-        self.screen.blit(game_over_surface, game_over_rect)
-        pygame.display.flip()
+        self.game_over_screen.draw(self.screen)
+        pygame.display.flip()  # Update the screen
+
+        # Wait for the player to press any key to continue
         self._wait_for_key()
 
     def _quit_game(self):

@@ -17,3 +17,15 @@ class StartScreen:
 
         screen.blit(self.title_surface, self.title_rect)
         screen.blit(self.instruction_surface, self.instruction_rect)
+
+
+class GameOverScreen(StartScreen):
+    def __init__(self, game_settings, screen):
+        super().__init__(game_settings, screen)
+        self.game_over_surface = self.game_settings.font.render("Game Over! Press any key to exit.",
+                                                           True, 'WHITE')
+        self.game_over_rect = self.game_over_surface.get_rect(center=self.screen.get_rect().center)
+
+    def draw(self, screen):
+        screen.fill('BLACK')
+        screen.blit(self.game_over_surface, self.game_over_rect)
