@@ -4,7 +4,7 @@ PyBlackJack
 """
 
 import pygame
-from PyGameBlackJack.StartEndScreen import StartScreen, GameOverScreen
+from PyGameBlackJack.GameScreens import StartScreen, GameOverScreen, GameScreen
 from os import system
 from Backend.settings import Settings, PyGameSettings
 from Deck.DeckOfCards import Deck
@@ -450,6 +450,7 @@ class PyGameBlackJack(Game):
         self._state = PyGameBlackJack.START  # Game states: START, PLAYING, GAME_OVER
         self.start_screen = StartScreen(self.game_settings, screen=self.screen)
         self.game_over_screen = GameOverScreen(self.game_settings, screen=self.screen)
+        self.game_screen = GameScreen(self.game_settings, screen=self.screen, player_name=self.game_settings.player_name)
 
         super().__init__(game_settings=self.game_settings, **kwargs)
 
@@ -550,9 +551,7 @@ class PyGameBlackJack(Game):
         """
         Render the main game playing screen.
         """
-        self.screen.fill(self.game_settings.bg_color)  # Green background for table
-        text_surface = self.game_settings.font.render(f"Player: {self.player_name}", True, (255, 255, 255))
-        self.screen.blit(text_surface, (10, 10))  # Render player name in the top-left corner
+        self.game_screen.draw(self.screen)
         pygame.display.flip()  # Update the display
 
     def _game_over_screen(self):

@@ -29,3 +29,15 @@ class GameOverScreen(StartScreen):
     def draw(self, screen):
         screen.fill('BLACK')
         screen.blit(self.game_over_surface, self.game_over_rect)
+
+
+class GameScreen(StartScreen):
+    def __init__(self, game_settings, screen, player_name):
+        super().__init__(game_settings, screen)
+        self.player_name = player_name
+        self.player_text_surface = self.game_settings.font.render(f"Player: {self.player_name}", True, (255, 255, 255))
+        self.game_screen_rect = self.player_text_surface.get_rect(center=self.screen.get_rect().center)
+
+    def draw(self, screen):
+        screen.fill(self.game_settings.bg_color)
+        screen.blit(self.player_text_surface, (10, 10))  # Render player name in the top-left corner
