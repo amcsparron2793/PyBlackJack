@@ -455,7 +455,8 @@ class PyGameBlackJack(Game):
         super().__init__(game_settings=self.game_settings, **kwargs)
 
         # FIXME: This is a hacky workaround - need to figure out how to easily parse tuples from config
-        self.game_settings.bg_color = PyGameSettings.GREEN_RGB
+        self.game_settings.game_screen_bg_color = PyGameSettings.GREEN_RGB
+        self.game_settings.game_over_screen_bg_color = PyGameSettings.BLACK_RGB
 
     @property
     def state(self):

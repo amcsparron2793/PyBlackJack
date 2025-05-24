@@ -27,9 +27,15 @@ class Settings:
 
 class PyGameSettings(Settings):
     GREEN_RGB = (0, 128, 0)
+    WHITE_RGB = (255, 255, 255)
+    BLACK_RGB = (0, 0, 0)
     def __init__(self, config=None):
         super().__init__(config)
-        self.bg_color = self.config.get('PYGAME', 'bg_color')
+        self.game_screen_bg_color = self.config.get('PYGAME', 'game_screen_bg_color')
+        self.start_screen_bg_color = self.config.get('PYGAME','start_screen_bg_color')
+        self.game_over_screen_bg_color = self.config.get('PYGAME','game_over_screen_bg_color')
+        self.game_font_color = self.config.get('PYGAME','game_font_color')
+
         self.screen_size = (self.config.getint('PYGAME', 'screen_size_width'),
                             self.config.getint('PYGAME', 'screen_size_height'))
         self.font = font.Font(None, 36)
@@ -62,7 +68,10 @@ class PyBlackJackConfig(BetterConfigAJM):
                     {'shoe_runout_warning_threshold': '15'},
                 'PYGAME':
                     {
-                        'bg_color': PyGameSettings.GREEN_RGB,
+                        'game_screen_bg_color': PyGameSettings.GREEN_RGB,
+                        'start_screen_bg_color': PyGameSettings.GREEN_RGB,
+                        'game_over_screen_bg_color': PyGameSettings.BLACK_RGB,
+                        'game_font_color': PyGameSettings.WHITE_RGB,
                         'screen_size_width': PyBlackJackConfig.DEFAULT_SCREEN_SIZE[0],
                         'screen_size_height': PyBlackJackConfig.DEFAULT_SCREEN_SIZE[1]
                     }
