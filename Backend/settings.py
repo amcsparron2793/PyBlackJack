@@ -39,6 +39,10 @@ class PyGameSettings(Settings):
         self.screen_size = (self.config.getint('PYGAME', 'screen_size_width'),
                             self.config.getint('PYGAME', 'screen_size_height'))
         self.font = font.Font(None, 36)
+        self.card_dir_location = Path(self.config.get('PYGAME', 'card_dir_location'))
+        self.card_back_location = Path(self.config.get('PYGAME', 'card_back_location'))
+        self.card_svg_path_list = {' '.join(x.stem.split('_of_')): x for x in self.card_dir_location.iterdir()
+                                   if not x.stem.endswith('2') and not x.stem.endswith('_joker')}
 
     @staticmethod
     def parse_tuple_from_config(config_value):
@@ -52,6 +56,9 @@ class PyBlackJackConfig(BetterConfigAJM):
     DEFAULT_DB_PATH = Path(Settings.GAME_ROOT_FOLDER, 'MiscProjectFiles/PyBlackJack.db')
     SETUP_DATABASE_SCRIPT_PATH = Path(Settings.GAME_ROOT_FOLDER, 'MiscProjectFiles/InitializeNewDB.sql')
     SETUP_NEW_PLAYER_SCRIPT_PATH = Path(Settings.GAME_ROOT_FOLDER, 'MiscProjectFiles/NewPlayerSetup.sql')
+    CARD_SVG_DEFAULT_PATH = Path(Settings.GAME_ROOT_FOLDER, 'MiscProjectFiles/PlayingCards/SVG-cards-1.3')
+    CARD_BACK_SVG_DEFAULT_PATH = CARD_SVG_DEFAULT_PATH.parent / 'card_back.svg' #Path(Settings.GAME_ROOT_FOLDER, 'MiscProjectFiles/PlayingCards/card_back.svg')
+
     DEFAULT_SCREEN_SIZE = (800, 600)
 
     def __init__(self, config_filename, config_dir, config_list_dict: List[dict] = None, logger: Logger = None):
@@ -79,7 +86,9 @@ class PyBlackJackConfig(BetterConfigAJM):
                         'game_over_screen_bg_color': PyGameSettings.BLACK_RGB,
                         'game_font_color': PyGameSettings.WHITE_RGB,
                         'screen_size_width': PyBlackJackConfig.DEFAULT_SCREEN_SIZE[0],
-                        'screen_size_height': PyBlackJackConfig.DEFAULT_SCREEN_SIZE[1]
+                        'screen_size_height': PyBlackJackConfig.DEFAULT_SCREEN_SIZE[1],
+                        'card_dir_location': PyBlackJackConfig.CARD_SVG_DEFAULT_PATH,
+                        'card_back_location': PyBlackJackConfig.CARD_BACK_SVG_DEFAULT_PATH
                     }
              }
         ]

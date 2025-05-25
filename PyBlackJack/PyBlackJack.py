@@ -8,7 +8,7 @@ from PyGameBlackJack.GameScreens import StartScreen, GameOverScreen, GameScreen
 from os import system
 from Backend.settings import Settings, PyGameSettings
 from Deck.DeckOfCards import Deck
-from Players.Players import Player, Dealer, DatabasePlayer
+from Players.Players import Player, Dealer, DatabasePlayer, PyGamePlayer, PyGameDatabasePlayer
 from Bank.Cage import Cage, DatabaseCage
 from Backend import yes_no
 from Backend.PlayerCashRecordDB import PyBlackJackSQLLite
@@ -72,14 +72,26 @@ class Game:
         self.game_deck.shuffle_deck()
 
         if not self.use_database:
+            if issubclass(self.__class__, PyGameBlackJack):
+                self.player = PyGamePlayer(settings=self.game_settings)
+            else:
+                self.player = Player(settings=self.game_settings)
             self.banker = Cage(settings=self.game_settings)
-            self.player = Player(settings=self.game_settings)
-        else:
+
+        elif self.use_database:
             self.db = kwargs.get('db', PyBlackJackSQLLite(settings=self.game_settings))
+
+            if issubclass(self.__class__, PyGameBlackJack):
+                self.player = PyGameDatabasePlayer(player_id=self.player_id,
+                                                   player_name=self.player_name,
+                                                   settings=self.game_settings)
+
+            else:
+                self.player = DatabasePlayer(player_id=self.player_id,
+                                             player_name=self.player_name,
+                                             settings=self.game_settings)
+
             self.banker = DatabaseCage(self.db, settings=self.game_settings)
-            self.player = DatabasePlayer(player_id=self.player_id,
-                                         player_name=self.player_name,
-                                         settings=self.game_settings)
 
         self.dealer = Dealer(chosen_card_back=self.game_deck.card_back)
         # initialize player chips and dealer chips
@@ -439,6 +451,7 @@ class PyGameBlackJack(Game):
     def __init__(self, **kwargs):
         pygame.init()
         self.game_settings = kwargs.pop('game_settings', PyGameSettings())
+        super().__init__(game_settings=self.game_settings, **kwargs)
 
         pygame.display.set_caption("PyBlackJack")
 
@@ -452,8 +465,11 @@ class PyGameBlackJack(Game):
         self.game_over_screen = GameOverScreen(self.game_settings, screen=self.screen)
         self.game_screen = GameScreen(self.game_settings, screen=self.screen,
                                       player_name=self.game_settings.player_name)
+        # FIXME: THIS IS ONLY FOR TESTING!!!!!!!!
+        self._initialize_game()
+        self.setup_new_hand()
+        self.player.print_hand()
 
-        super().__init__(game_settings=self.game_settings, **kwargs)
 
     @property
     def state(self):
