@@ -357,22 +357,23 @@ class PyGamePlayer(Player):
         self.settings = kwargs.get('settings', PyGameSettings())
 
     @staticmethod
-    def get_unicode_suit_name(unicode_char):
+    def extract_suit_name(unicode_char):
         return unicodedata.name(unicode_char).split()[1].lower() + 's'
 
     def print_hand(self):
-        t_hand = self.translate_hand()
+        t_hand = self.get_translated_hand()
         # TODO: draw the cards in the hand on the screen
 
-    def translate_hand(self) -> List[Path]:
-        translated_hand = []
-        for card in self.hand:
-            value = card[0]
-            suit_name = self.get_unicode_suit_name(card[1])
-            card_path_key = (str(value) + ' ' + suit_name)
-            translated_card_path = self.settings.card_svg_path_list[card_path_key]
-            translated_hand.append(translated_card_path)
-        return translated_hand
+    def get_translated_hand(self) -> List[Path]:
+        return [self._translate_card(card) for card in self.hand]
+
+    def _translate_card(self, card: tuple) -> Path:
+        """Translate a single card into its corresponding SVG path."""
+        value, suit_unicode = card
+        suit_name = self.extract_suit_name(suit_unicode)
+        card_path_key = f"{value} {suit_name}"
+        return self.settings.card_svg_path_list[card_path_key]
+
 
 
 class PyGameDatabasePlayer(DatabasePlayer, PyGamePlayer):
