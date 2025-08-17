@@ -1,6 +1,6 @@
 import itertools
 import random
-
+from enum import Enum
 from Backend.settings import Settings
 
 
@@ -24,6 +24,29 @@ class EmptyShoeError(BaseException):
         """
         self.__traceback__ = tb
         return self
+
+
+class CardValues(Enum):
+    ACE = 1
+    TWO = 2
+    THREE = 3
+    FOUR = 4
+    FIVE = 5
+    SIX = 6
+    SEVEN = 7
+    EIGHT = 8
+    NINE = 9
+    TEN = 10
+    JACK = 11
+    QUEEN = 12
+    KING = 13
+
+
+class CardSuits(Enum):
+    HEART = '\u2661'
+    DIAMOND = '\u2662'
+    CLUB = '\u2667'
+    SPADE = '\u2664'
 
 
 class Cards:
@@ -50,8 +73,6 @@ class Cards:
     :ivar value: Numeric values representing cards in the deck.
     :type value: range
     """
-    UNICODE_SUITS = ['\u2664', '\u2661', '\u2662', '\u2667']
-    PLAINTEXT_SUITS = ['Spade', 'Heart', 'Diamond', 'Club']
     UNICODE_CARD_BACK = '\U0001F0A0'
     PLAINTEXT_CARD_BACK = 'xxxx'
 
@@ -66,14 +87,14 @@ class Cards:
                 self.card_back = Cards.UNICODE_CARD_BACK
             else:
                 self.card_back = self.card_back
-            self.suit = Cards.UNICODE_SUITS
+            self.suit = [x.value for x in CardSuits]
         else:
             self.card_back = Cards.PLAINTEXT_CARD_BACK
-            self.suit = Cards.PLAINTEXT_SUITS
+            self.suit = [x.name for x in CardSuits]
 
-        self.value = range(1, 14)
     # TODO: change this to have a value and suit property and rename it to Card?
     #  make self.suit and self.value into 'all suits' and 'all values', and make that part of Deck?
+        self.value = [x.value for x in CardValues]
 
 
 class Deck(Cards):
@@ -90,12 +111,12 @@ class Deck(Cards):
     """
 
     DEFAULT_SHOE_RUNOUT_WARNING_THRESHOLD = 15
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         self.settings = kwargs.pop('settings', Settings())
         self.shoe_runout_warning_threshold = kwargs.pop('shoe_runout_warning_threshold',
                                                         self.settings.shoe_runout_warning_threshold)
                                                         #Deck.DEFAULT_SHOE_RUNOUT_WARNING_THRESHOLD)
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
         self.deck = list(itertools.product(self.value, self.suit))
 
 

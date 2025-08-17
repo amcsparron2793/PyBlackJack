@@ -8,7 +8,7 @@ from PyGameBlackJack import GameStates
 from PyGameBlackJack.GameScreens import StartScreen, GameOverScreen, GameScreen
 from os import system
 from Backend.settings import Settings, PyGameSettings
-from Deck.DeckOfCards import Deck
+from Deck.DeckOfCards import Deck, CardSuits
 from Players.Players import Player, Dealer, DatabasePlayer, PyGamePlayer, PyGameDatabasePlayer
 from Bank.Cage import Cage, DatabaseCage
 from Backend import yes_no
@@ -46,7 +46,7 @@ class Game:
 
         self.game_settings = kwargs.get('game_settings', Settings())
 
-        #self._start_screen()
+        self._start_screen()
 
         self._initialize_game(**kwargs)
 
@@ -129,7 +129,7 @@ class Game:
         :rtype: str
         """
         if self.game_settings.use_unicode_cards:
-            suits = Deck.UNICODE_SUITS
+            suits = [x.value for x in CardSuits]
         else:
             suits = ''
         suits_string = ''
