@@ -46,8 +46,6 @@ class Game:
 
         self.game_settings = kwargs.get('game_settings', Settings())
 
-        self._start_screen()
-
         self._initialize_game(**kwargs)
 
 
