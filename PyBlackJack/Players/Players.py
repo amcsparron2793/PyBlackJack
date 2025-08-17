@@ -372,6 +372,18 @@ class PyGamePlayer(Player):
         value, suit_unicode = card
         suit_name = self.extract_suit_name(suit_unicode)
         card_path_key = f"{value} {suit_name}"
+        if card_path_key not in self.settings.card_svg_path_list:
+            # TODO: hacky workaround, turn cards into an enum of NAME VALUE instead?
+            if value == 1:
+                card_path_key = f"ace {suit_name}"
+            elif value == 11:
+                card_path_key = f"jack {suit_name}"
+            elif value == 12:
+                card_path_key = f"queen {suit_name}"
+            elif value == 13:
+                card_path_key = f"king {suit_name}"
+            else:
+                raise ValueError(f"Invalid card value: {value}")
         return self.settings.card_svg_path_list[card_path_key]
 
 
