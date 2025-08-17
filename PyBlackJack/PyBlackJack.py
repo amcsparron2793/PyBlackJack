@@ -4,12 +4,12 @@ PyBlackJack
 """
 
 import pygame
-from PyGameBlackJack.StartScreen import StartScreen
 from PyGameBlackJack import GameStates
+from PyGameBlackJack.GameScreens import StartScreen, GameOverScreen, GameScreen
 from os import system
 from Backend.settings import Settings, PyGameSettings
 from Deck.DeckOfCards import Deck
-from Players.Players import Player, Dealer, DatabasePlayer
+from Players.Players import Player, Dealer, DatabasePlayer, PyGamePlayer, PyGameDatabasePlayer
 from Bank.Cage import Cage, DatabaseCage
 from Backend import yes_no
 from Backend.PlayerCashRecordDB import PyBlackJackSQLLite
@@ -73,14 +73,26 @@ class Game:
         self.game_deck.shuffle_deck()
 
         if not self.use_database:
+            if issubclass(self.__class__, PyGameBlackJack):
+                self.player = PyGamePlayer(settings=self.game_settings)
+            else:
+                self.player = Player(settings=self.game_settings)
             self.banker = Cage(settings=self.game_settings)
-            self.player = Player(settings=self.game_settings)
-        else:
+
+        elif self.use_database:
             self.db = kwargs.get('db', PyBlackJackSQLLite(settings=self.game_settings))
+
+            if issubclass(self.__class__, PyGameBlackJack):
+                self.player = PyGameDatabasePlayer(player_id=self.player_id,
+                                                   player_name=self.player_name,
+                                                   settings=self.game_settings)
+
+            else:
+                self.player = DatabasePlayer(player_id=self.player_id,
+                                             player_name=self.player_name,
+                                             settings=self.game_settings)
+
             self.banker = DatabaseCage(self.db, settings=self.game_settings)
-            self.player = DatabasePlayer(player_id=self.player_id,
-                                         player_name=self.player_name,
-                                         settings=self.game_settings)
 
         self.dealer = Dealer(chosen_card_back=self.game_deck.card_back)
         # initialize player chips and dealer chips
@@ -435,6 +447,7 @@ class PyGameBlackJack(Game):
     def __init__(self, **kwargs):
         pygame.init()
         self.game_settings = kwargs.pop('game_settings', PyGameSettings())
+        super().__init__(game_settings=self.game_settings, **kwargs)
 
         pygame.display.set_caption("PyBlackJack")
 
@@ -445,11 +458,14 @@ class PyGameBlackJack(Game):
 
         self._state = GameStates.START  # Game states: START, PLAYING, GAME_OVER
         self.start_screen = StartScreen(self.game_settings, screen=self.screen)
+        self.game_over_screen = GameOverScreen(self.game_settings, screen=self.screen)
+        self.game_screen = GameScreen(self.game_settings, screen=self.screen,
+                                      player_name=self.game_settings.player_name)
+        # FIXME: THIS IS ONLY FOR TESTING!!!!!!!!
+        self._initialize_game()
+        self.setup_new_hand()
+        self.player.print_hand()
 
-        super().__init__(game_settings=self.game_settings, **kwargs)
-
-        # FIXME: This is a hacky workaround - need to figure out how to easily parse tuples from config
-        self.game_settings.bg_color = PyGameSettings.GREEN_RGB
 
     @property
     def state(self):
@@ -545,22 +561,17 @@ class PyGameBlackJack(Game):
         """
         Render the main game playing screen.
         """
-        self.screen.fill(self.game_settings.bg_color)  # Green background for table
-        text_surface = self.game_settings.font.render(f"Player: {self.player_name}", True, (255, 255, 255))
-        self.screen.blit(text_surface, (10, 10))  # Render player name in the top-left corner
+        self.game_screen.draw(self.screen)
         pygame.display.flip()  # Update the display
 
     def _game_over_screen(self):
         """
         Display the game over screen.
         """
-        self.screen.fill((0, 0, 0))  # Black background
-        # TODO: make this its own thing like startscreen?
-        game_over_surface = self.game_settings.font.render("Game Over! Press any key to exit.",
-                                             True, (255, 255, 255))
-        game_over_rect = game_over_surface.get_rect(center=(400, 300))
-        self.screen.blit(game_over_surface, game_over_rect)
-        pygame.display.flip()
+        self.game_over_screen.draw(self.screen)
+        pygame.display.flip()  # Update the screen
+
+        # Wait for the player to press any key to continue
         self._wait_for_key()
 
     def _quit_game(self):

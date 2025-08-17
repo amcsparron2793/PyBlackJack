@@ -72,6 +72,8 @@ class Cards:
             self.suit = Cards.PLAINTEXT_SUITS
 
         self.value = range(1, 14)
+    # TODO: change this to have a value and suit property and rename it to Card?
+    #  make self.suit and self.value into 'all suits' and 'all values', and make that part of Deck?
 
 
 class Deck(Cards):

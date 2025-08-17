@@ -1,0 +1,33 @@
+<svg
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    width="200"
+    height="300"
+    viewBox="0 0 200 300"
+    version="1.1"
+>
+    <!-- Card Border with Rounded Corners -->
+    <rect x="0" y="0" width="200" height="300" rx="20" ry="20" fill="white" stroke="black" stroke-width="5"/>
+
+    <!-- Background with Rounded Corners -->
+    <rect x="10" y="10" width="180" height="280" rx="15" ry="15" fill="#024e76"/>
+
+    <!-- Inner Pattern -->
+    <circle cx="100" cy="150" r="80" fill="none" stroke="white" stroke-width="3"/>
+    <circle cx="100" cy="150" r="60" fill="none" stroke="white" stroke-width="2"/>
+    <circle cx="100" cy="150" r="40" fill="none" stroke="white" stroke-width="1.5"/>
+
+    <!-- Cross Shapes -->
+    <line x1="20" y1="150" x2="180" y2="150" stroke="white" stroke-width="2"/>
+    <line x1="100" y1="50" x2="100" y2="250" stroke="white" stroke-width="2"/>
+
+    <!-- Decorative Diamonds -->
+    <polygon points="100,130 110,150 100,170 90,150" fill="white"/>
+    <polygon points="100,90 105,105 100,120 95,105" fill="white"/>
+    <polygon points="100,210 105,195 100,180 95,195" fill="white"/>
+    <polygon points="130,150 115,155 100,150 115,145" fill="white"/>
+    <polygon points="70,150 85,155 100,150 85,145" fill="white"/>
+
+    <!-- Outer Border Pattern with Rounded Corners -->
+    <!--<rect x="0" y="0" width="200" height="300" rx="20" ry="20" fill="none" stroke="white" stroke-width="4" stroke-dasharray="15,7"/>-->
+</svg>

@@ -1,7 +1,11 @@
+from pathlib import Path
+from typing import List
+
+import unicodedata
 import random
 from os import system
 from Backend import yes_no
-from Backend.settings import Settings
+from Backend.settings import Settings, PyGameSettings
 from Backend.PlayerCashRecordDB import PyBlackJackSQLLite, PlayerDoesNotExistError
 
 
@@ -66,7 +70,7 @@ class Player:
         exit(0)
 
     @staticmethod
-    def get_print_hand(hand):
+    def get_print_hand(hand) -> list:
         """
         Converts the numeric representation of card ranks in a hand to their corresponding name
         representation for better readability. Cards with rank identifiers 1, 11, 12, and 13 are
@@ -345,6 +349,35 @@ class DatabasePlayer(Player):
             return {self.db.NEW_PLAYER_DICT_KEYS[0]: fn, self.db.NEW_PLAYER_DICT_KEYS[1]: ln}
         else:
             raise PlayerDoesNotExistError("Player does not exist in database.")
+
+
+class PyGamePlayer(Player):
+    def __init__(self, player_chips: int = None, **kwargs):
+        super().__init__(player_chips)
+        self.settings = kwargs.get('settings', PyGameSettings())
+
+    @staticmethod
+    def extract_suit_name(unicode_char):
+        return unicodedata.name(unicode_char).split()[1].lower() + 's'
+
+    def print_hand(self):
+        t_hand = self.get_translated_hand()
+        # TODO: draw the cards in the hand on the screen
+
+    def get_translated_hand(self) -> List[Path]:
+        return [self._translate_card(card) for card in self.hand]
+
+    def _translate_card(self, card: tuple) -> Path:
+        """Translate a single card into its corresponding SVG path."""
+        value, suit_unicode = card
+        suit_name = self.extract_suit_name(suit_unicode)
+        card_path_key = f"{value} {suit_name}"
+        return self.settings.card_svg_path_list[card_path_key]
+
+
+
+class PyGameDatabasePlayer(DatabasePlayer, PyGamePlayer):
+    ...
 
 
 if __name__ == "__main__":
