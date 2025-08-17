@@ -4,7 +4,7 @@ PyBlackJack
 """
 from os import system
 from Backend.settings import Settings
-from Deck.DeckOfCards import Deck
+from Deck.DeckOfCards import Deck, CardSuits
 from Players.Players import Player, Dealer, DatabasePlayer
 from Bank.Cage import Cage, DatabaseCage
 from Backend import yes_no
@@ -113,7 +113,7 @@ class Game:
         :rtype: str
         """
         if self.game_settings.use_unicode_cards:
-            suits = Deck.UNICODE_SUITS
+            suits = CardSuits
         else:
             suits = ''
         suits_string = ''
