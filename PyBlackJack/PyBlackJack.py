@@ -5,6 +5,7 @@ PyBlackJack
 
 import pygame
 from PyGameBlackJack.StartScreen import StartScreen
+from PyGameBlackJack import GameStates
 from os import system
 from Backend.settings import Settings, PyGameSettings
 from Deck.DeckOfCards import Deck
@@ -431,11 +432,6 @@ class Game:
 
 
 class PyGameBlackJack(Game):
-    START = "START"
-    PLAYING = "PLAYING"
-    GAME_OVER = "GAME_OVER"
-    GAME_STATES = [START, PLAYING, GAME_OVER]
-
     def __init__(self, **kwargs):
         pygame.init()
         self.game_settings = kwargs.pop('game_settings', PyGameSettings())
@@ -447,7 +443,7 @@ class PyGameBlackJack(Game):
 
         self.running = True
 
-        self._state = PyGameBlackJack.START  # Game states: START, PLAYING, GAME_OVER
+        self._state = GameStates.START  # Game states: START, PLAYING, GAME_OVER
         self.start_screen = StartScreen(self.game_settings, screen=self.screen)
 
         super().__init__(game_settings=self.game_settings, **kwargs)
@@ -461,7 +457,7 @@ class PyGameBlackJack(Game):
 
     @state.setter
     def state(self, value):
-        if value in PyGameBlackJack.GAME_STATES:
+        if value in GameStates:
             self._state = value
         else:
             raise ValueError(f"Invalid game state: {value}")
@@ -472,7 +468,7 @@ class PyGameBlackJack(Game):
             # self.play()
         elif event.key == pygame.K_ESCAPE:
             # self.running = False
-            self.state = PyGameBlackJack.GAME_OVER
+            self.state = GameStates.GAME_OVER
         elif event.key == pygame.K_h:  # Example: Player hits
             print("Player hits (logic under development)")
         elif event.key == pygame.K_s:  # Example: Player stays
@@ -482,7 +478,7 @@ class PyGameBlackJack(Game):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
-                self.state = PyGameBlackJack.GAME_OVER
+                self.state = GameStates.GAME_OVER
             elif event.type == pygame.KEYDOWN:
                 self._keydown_events(event)
 
@@ -515,14 +511,14 @@ class PyGameBlackJack(Game):
         """
         while self.running:
             # Handle game states
-            if self.state == PyGameBlackJack.START:
+            if self.state == GameStates.START:
                 self._start_screen()
-                self.state = PyGameBlackJack.PLAYING  # Transition to the playing state
+                self.state = GameStates.PLAYING  # Transition to the playing state
 
-            elif self.state == PyGameBlackJack.PLAYING:
+            elif self.state == GameStates.PLAYING:
                 self._game_loop()
 
-            elif self.state == PyGameBlackJack.GAME_OVER:
+            elif self.state == GameStates.GAME_OVER:
                 self._game_over_screen()
                 self.running = False  # Exit loop after displaying game over
 
@@ -532,7 +528,7 @@ class PyGameBlackJack(Game):
         """
         The main game-playing loop.
         """
-        while self.state == PyGameBlackJack.PLAYING:
+        while self.state == GameStates.PLAYING:
             # Event handling
             self.check_events()
 
