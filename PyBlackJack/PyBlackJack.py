@@ -113,7 +113,7 @@ class Game:
         :rtype: str
         """
         if self.game_settings.use_unicode_cards:
-            suits = CardSuits
+            suits = [x.value for x in CardSuits]
         else:
             suits = ''
         suits_string = ''
