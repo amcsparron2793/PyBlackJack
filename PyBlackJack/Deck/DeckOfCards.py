@@ -109,12 +109,12 @@ class Deck(Cards):
     """
 
     DEFAULT_SHOE_RUNOUT_WARNING_THRESHOLD = 15
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         self.settings = kwargs.pop('settings', Settings())
         self.shoe_runout_warning_threshold = kwargs.pop('shoe_runout_warning_threshold',
                                                         self.settings.shoe_runout_warning_threshold)
                                                         #Deck.DEFAULT_SHOE_RUNOUT_WARNING_THRESHOLD)
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
         self.deck = list(itertools.product(self.value, self.suit))
 
 
