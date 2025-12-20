@@ -39,10 +39,35 @@ class PyGameSettings(Settings):
         self.screen_size = (self.config.getint('PYGAME', 'screen_size_width'),
                             self.config.getint('PYGAME', 'screen_size_height'))
         self.font = font.Font(None, 36)
-        self.card_dir_location = Path(self.config.get('PYGAME', 'card_dir_location'))
-        self.card_back_location = Path(self.config.get('PYGAME', 'card_back_location'))
-        self.card_svg_path_list = {' '.join(x.stem.split('_of_')): x for x in self.card_dir_location.iterdir()
-                                   if not x.stem.endswith('2') and not x.stem.endswith('_joker')}
+
+        # Resolve card asset locations, preferring the project's SVG-cards-1.3 when available
+        cfg_dir = Path(self.config.get('PYGAME', 'card_dir_location'))
+        default_dir = PyBlackJackConfig.CARD_SVG_DEFAULT_PATH
+        # Pick configured directory if it exists; otherwise fall back to default
+        self.card_dir_location = (cfg_dir if cfg_dir.exists() and cfg_dir.is_dir() else default_dir).resolve()
+
+        cfg_back = Path(self.config.get('PYGAME', 'card_back_location'))
+        default_back = PyBlackJackConfig.CARD_BACK_SVG_DEFAULT_PATH
+        # Pick configured back if it exists; otherwise fall back to default
+        self.card_back_location = (cfg_back if cfg_back.exists() and cfg_back.is_file() else default_back).resolve()
+
+        def _build_map(from_dir: Path):
+            try:
+                return {
+                    ' '.join(x.stem.split('_of_')): x.resolve()
+                    for x in from_dir.iterdir()
+                    if x.suffix.lower() == '.svg'
+                    and not x.stem.endswith('2')
+                    and not x.stem.endswith('_joker')
+                }
+            except Exception:
+                return {}
+
+        self.card_svg_path_list = _build_map(self.card_dir_location)
+        # If the configured directory didn't yield any cards, try default path as a fallback
+        if not self.card_svg_path_list and default_dir.exists():
+            self.card_svg_path_list = _build_map(default_dir.resolve())
+            self.card_dir_location = default_dir.resolve()
 
     @staticmethod
     def parse_tuple_from_config(config_value):

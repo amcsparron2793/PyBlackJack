@@ -458,10 +458,14 @@ class PyGameBlackJack(Game):
         self.start_screen = StartScreen(self.game_settings, screen=self.screen)
         self.game_over_screen = GameOverScreen(self.game_settings, screen=self.screen)
         self.game_screen = GameScreen(self.game_settings, screen=self.screen,
-                                      player_name=self.game_settings.player_name)
-        # FIXME: THIS IS ONLY FOR TESTING!!!!!!!!
+                                      player=self.player, dealer=self.dealer)
+        # # FIXME: THIS IS ONLY FOR TESTING!!!!!!!!
         self._initialize_game()
         self.setup_new_hand()
+        # ensure GameScreen references current player/dealer after re-init
+        self.game_screen.player = self.player
+        self.game_screen.dealer = self.dealer
+        self.game_screen.dealer_revealed = False
         self.player.print_hand()
 
 
@@ -478,15 +482,21 @@ class PyGameBlackJack(Game):
 
     def _keydown_events(self, event):
         if event.key == pygame.K_SPACE:
-            print("space")
-            # self.play()
+            # Reserved for future use (e.g., animations)
+            pass
         elif event.key == pygame.K_ESCAPE:
-            # self.running = False
             self.state = GameStates.GAME_OVER
-        elif event.key == pygame.K_h:  # Example: Player hits
-            print("Player hits (logic under development)")
-        elif event.key == pygame.K_s:  # Example: Player stays
-            print("Player stays (logic under development)")
+        elif event.key == pygame.K_h:  # Player hits
+            self.hit(self.player)
+        elif event.key == pygame.K_s:  # Player stays
+            self.stay(self.player)
+        elif event.key == pygame.K_r:  # Reveal dealer hand toggle
+            if hasattr(self.game_screen, 'dealer_revealed'):
+                self.game_screen.dealer_revealed = not self.game_screen.dealer_revealed
+        elif event.key == pygame.K_n:  # New hand
+            self.setup_new_hand()
+            if hasattr(self.game_screen, 'dealer_revealed'):
+                self.game_screen.dealer_revealed = False
 
     def check_events(self):
         for event in pygame.event.get():
