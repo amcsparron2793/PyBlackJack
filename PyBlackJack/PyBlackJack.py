@@ -459,9 +459,7 @@ class PyGameBlackJack(Game):
         self.game_over_screen = GameOverScreen(self.game_settings, screen=self.screen)
         self.game_screen = GameScreen(self.game_settings, screen=self.screen,
                                       player=self.player, dealer=self.dealer)
-        # # FIXME: THIS IS ONLY FOR TESTING!!!!!!!!
-        self._initialize_game()
-        self.setup_new_hand()
+
         # ensure GameScreen references current player/dealer after re-init
         self.game_screen.player = self.player
         self.game_screen.dealer = self.dealer
@@ -540,6 +538,7 @@ class PyGameBlackJack(Game):
                 self.state = GameStates.PLAYING  # Transition to the playing state
 
             elif self.state == GameStates.PLAYING:
+                self.setup_new_hand()
                 self._game_loop()
 
             elif self.state == GameStates.GAME_OVER:
@@ -556,9 +555,8 @@ class PyGameBlackJack(Game):
             # Event handling
             self.check_events()
 
-            # Update game logic
-            # Add functionality such as checking for a bust, dealer actions, etc.
-
+            # TODO: Update game logic
+            #  Add functionality such as checking for a bust, dealer actions, etc.
             # Render game screen
             self._render_game_screen()
 
