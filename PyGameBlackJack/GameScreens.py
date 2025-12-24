@@ -67,16 +67,17 @@ class GameScreen(StartScreen):
         top_margin = 50
         bottom_margin = 60
 
+        # TODO: put these into their classes print_hand methods
         # Dealer hand
         if hasattr(self.player, '_translate_card'):
-            translate = self.player._translate_card  # reuse existing translator
+            translate = self.player.translate_card  # reuse existing translator
         else:
             translate = lambda c: Path("")  # type: ignore
 
         if getattr(self, 'dealer_revealed', False):
             dealer_paths = [translate(c) for c in getattr(self.dealer, 'hand', [])]
         else:
-            # Show back of first card, rest face up
+            # Show the back of the first card, rest face up
             remaining = list(getattr(self.dealer, 'hand', []))[1:]
             dealer_paths = [self.card_back_svg] + [translate(c) for c in remaining]
 
@@ -94,35 +95,46 @@ class GameScreen(StartScreen):
             target_height=self.card_target_height,
             x_spacing=28,
         )
+        self.draw_dx_overlay(screen, bottom_margin=bottom_margin)
 
+    def _get_dx_info(self, screen, bottom_margin: int = 60):
+        status = get_renderer_status()
+        backend = status.get('backend', 'unknown')
+        avail = status.get('available_backends', {})
+        base_y = screen.get_height() - bottom_margin - self.card_target_height - 40
+        return backend, avail, base_y
+
+    def draw_dx_overlay(self, screen, bottom_margin: int = 60):
         # Diagnostics overlay: show active renderer and guidance
         try:
-            status = get_renderer_status()
-            backend = status.get('backend', 'unknown')
-            avail = status.get('available_backends', {})
-            base_y = screen.get_height() - bottom_margin - self.card_target_height - 40
+            backend, avail, base_y = self._get_dx_info(screen, bottom_margin=bottom_margin)
 
             # Always show which renderer is active
-            info_surface = self.game_settings.font.render(f"Renderer: {backend}", True, (200, 200, 200))
+            info_surface = self.game_settings.font.render(f"Renderer: {backend}", True, self.game_settings.dx_font_color)
             screen.blit(info_surface, (10, max(10, base_y)))
 
             if backend == "placeholder":
-                # No working rasterizer found; provide guidance
-                warn_lines = [
-                    "No SVG rasterizer found. Install ANY ONE of:",
-                    " - pip install cairosvg  OR  rsvg-convert  OR  ImageMagick (magick)  OR  Inkscape",
-                ]
-                for i, line in enumerate(warn_lines, start=1):
-                    warn_surface = self.game_settings.font.render(line, True, (255, 80, 80))
-                    screen.blit(warn_surface, (10, max(10, base_y - 20 * i)))
+                self.placeholder_fallback(screen, base_y=base_y, avail=avail)
+        except Exception:
+            pass
 
-                # Show which tools are currently detected
-                try:
-                    detected = [name for name, ok in avail.items() if ok]
-                    det_text = f"Detected: {', '.join(detected) if detected else 'none'}"
-                    det_surface = self.game_settings.font.render(det_text, True, (255, 180, 180))
-                    screen.blit(det_surface, (10, max(10, base_y + 24)))
-                except Exception:
-                    pass
+    def placeholder_fallback(self, screen, base_y: int = 60, avail=None):
+        # No working rasterizer found; provide guidance
+        if avail is None:
+            avail = dict()
+        warn_lines = [
+            "No SVG rasterizer found. Install ANY ONE of:",
+            " - pip install cairosvg  OR  rsvg-convert  OR  ImageMagick (magick)  OR  Inkscape",
+        ]
+        for i, line in enumerate(warn_lines, start=1):
+            warn_surface = self.game_settings.font.render(line, True, (255, 80, 80))
+            screen.blit(warn_surface, (10, max(10, base_y - 20 * i)))
+
+        # Show which tools are currently detected
+        try:
+            detected = [name for name, ok in avail.items() if ok]
+            det_text = f"Detected: {', '.join(detected) if detected else 'none'}"
+            det_surface = self.game_settings.font.render(det_text, True, (255, 180, 180))
+            screen.blit(det_surface, (10, max(10, base_y + 24)))
         except Exception:
             pass

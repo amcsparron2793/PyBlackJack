@@ -365,9 +365,9 @@ class PyGamePlayer(Player):
         # TODO: draw the cards in the hand on the screen
 
     def get_translated_hand(self) -> List[Path]:
-        return [self._translate_card(card) for card in self.hand]
+        return [self.translate_card(card) for card in self.hand]
 
-    def _translate_card(self, card: tuple) -> Path:
+    def translate_card(self, card: tuple) -> Path:
         """Translate a single card into its corresponding SVG path."""
         value, suit_unicode = card
         suit_name = self.extract_suit_name(suit_unicode)
@@ -387,6 +387,8 @@ class PyGamePlayer(Player):
         return self.settings.card_svg_path_list[card_path_key]
 
 
+class PyGameDealer(Dealer, PyGamePlayer):
+    ...
 
 class PyGameDatabasePlayer(DatabasePlayer, PyGamePlayer):
     ...

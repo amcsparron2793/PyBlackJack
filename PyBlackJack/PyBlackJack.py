@@ -9,7 +9,7 @@ from PyGameBlackJack.GameScreens import StartScreen, GameOverScreen, GameScreen
 from os import system
 from Backend.settings import Settings, PyGameSettings
 from Deck.DeckOfCards import Deck, CardSuits
-from Players.Players import Player, Dealer, DatabasePlayer, PyGamePlayer, PyGameDatabasePlayer
+from Players.Players import Player, Dealer, DatabasePlayer, PyGamePlayer, PyGameDatabasePlayer, PyGameDealer
 from Bank.Cage import Cage, DatabaseCage
 from Backend import yes_no
 from Backend.PlayerCashRecordDB import PyBlackJackSQLLite
@@ -75,6 +75,8 @@ class Game:
                 self.player = PyGamePlayer(settings=self.game_settings)
             else:
                 self.player = Player(settings=self.game_settings)
+                self.dealer = Dealer(chosen_card_back=self.game_deck.card_back)
+
             self.banker = Cage(settings=self.game_settings)
 
         elif self.use_database:
@@ -91,8 +93,10 @@ class Game:
                                              settings=self.game_settings)
 
             self.banker = DatabaseCage(self.db, settings=self.game_settings)
-
-        self.dealer = Dealer(chosen_card_back=self.game_deck.card_back)
+        if issubclass(self.__class__, PyGameBlackJack):
+            self.dealer = PyGameDealer(chosen_card_back=self.game_deck.card_back)
+        else:
+            self.dealer = Dealer(chosen_card_back=self.game_deck.card_back)
         # initialize player chips and dealer chips
         self.banker.pay_in(self.player)
         self.banker.pay_in(self.dealer)
@@ -488,6 +492,7 @@ class PyGameBlackJack(Game):
             self.hit(self.player)
         elif event.key == pygame.K_s:  # Player stays
             self.stay(self.player)
+        # TODO: finish/dont use this?
         elif event.key == pygame.K_r:  # Reveal dealer hand toggle
             if hasattr(self.game_screen, 'dealer_revealed'):
                 self.game_screen.dealer_revealed = not self.game_screen.dealer_revealed

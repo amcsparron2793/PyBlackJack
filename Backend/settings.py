@@ -29,12 +29,15 @@ class PyGameSettings(Settings):
     GREEN_RGB = (0, 128, 0)
     WHITE_RGB = (255, 255, 255)
     BLACK_RGB = (0, 0, 0)
+    GRAY_RGB = (200, 200, 200)
+
     def __init__(self, config=None):
         super().__init__(config)
         self.game_screen_bg_color = self.parse_tuple_from_config(self.config.get('PYGAME', 'game_screen_bg_color'))
         self.start_screen_bg_color = self.parse_tuple_from_config(self.config.get('PYGAME','start_screen_bg_color'))
         self.game_over_screen_bg_color = self.parse_tuple_from_config(self.config.get('PYGAME','game_over_screen_bg_color'))
         self.game_font_color = self.parse_tuple_from_config(self.config.get('PYGAME','game_font_color'))
+        self.dx_font_color = self.parse_tuple_from_config(self.config.get('PYGAME', 'dx_font_color'))
 
         self.screen_size = (self.config.getint('PYGAME', 'screen_size_width'),
                             self.config.getint('PYGAME', 'screen_size_height'))
@@ -110,6 +113,7 @@ class PyBlackJackConfig(BetterConfigAJM):
                         'start_screen_bg_color': PyGameSettings.GREEN_RGB,
                         'game_over_screen_bg_color': PyGameSettings.BLACK_RGB,
                         'game_font_color': PyGameSettings.WHITE_RGB,
+                        'dx_font_color': PyGameSettings.GRAY_RGB,
                         'screen_size_width': PyBlackJackConfig.DEFAULT_SCREEN_SIZE[0],
                         'screen_size_height': PyBlackJackConfig.DEFAULT_SCREEN_SIZE[1],
                         'card_dir_location': PyBlackJackConfig.CARD_SVG_DEFAULT_PATH,
