@@ -447,7 +447,6 @@ class Game:
 
 class PyGameBlackJack(Game):
     def __init__(self, **kwargs):
-        raise NotImplementedError("PyGameBlackJack is not yet implemented. Please use PyBlackJack instead.")
         pygame.init()
         self.game_settings = kwargs.pop('game_settings', PyGameSettings())
         super().__init__(game_settings=self.game_settings, **kwargs)
@@ -597,6 +596,6 @@ class PyGameBlackJack(Game):
 
 
 if __name__ == '__main__':
-    game = Game()
+    game = PyGameBlackJack()
     game.play()
 

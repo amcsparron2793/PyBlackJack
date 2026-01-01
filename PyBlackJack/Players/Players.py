@@ -4,10 +4,11 @@ from typing import List
 import unicodedata
 import random
 from os import system
+
 from Backend import yes_no
 from Backend.settings import Settings, PyGameSettings
 from Backend.PlayerCashRecordDB import PyBlackJackSQLLite, PlayerDoesNotExistError
-
+from Backend.enum import FaceCard
 
 class Player:
     """
@@ -393,16 +394,9 @@ class PyGamePlayer(Player):
         suit_name = self.extract_suit_name(suit_unicode)
         card_path_key = f"{value} {suit_name}"
         if card_path_key not in self.settings.card_svg_path_list:
-            # TODO: hacky workaround, turn cards into an enum of NAME VALUE instead?
-            if value == 1:
-                card_path_key = f"ace {suit_name}"
-            elif value == 11:
-                card_path_key = f"jack {suit_name}"
-            elif value == 12:
-                card_path_key = f"queen {suit_name}"
-            elif value == 13:
-                card_path_key = f"king {suit_name}"
-            else:
+            card_path_key = [' '.join([fc.name.lower(), suit_name])
+                             for fc in FaceCard if fc.value == value][0]
+            if not card_path_key:
                 raise ValueError(f"Invalid card value: {value}")
         return self.settings.card_svg_path_list[card_path_key]
 
