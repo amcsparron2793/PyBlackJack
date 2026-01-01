@@ -1,5 +1,5 @@
 from pathlib import Path
-from PyGameBlackJack.card_renderer import draw_hand, get_renderer_status
+from PyGameBlackJack.card_renderer import get_renderer_status
 
 class StartScreen:
     def __init__(self, game_settings, screen):
@@ -67,34 +67,25 @@ class GameScreen(StartScreen):
         top_margin = 50
         bottom_margin = 60
 
-        # TODO: put these into their classes print_hand methods
-        # Dealer hand
-        if hasattr(self.player, '_translate_card'):
-            translate = self.player.translate_card  # reuse existing translator
-        else:
-            translate = lambda c: Path("")  # type: ignore
+        # Dealer hand via class method
+        if hasattr(self.dealer, 'print_hand'):
+            self.dealer.print_hand(
+                screen=screen,
+                start_xy=(10, top_margin),
+                target_height=self.card_target_height,
+                x_spacing=28,
+                reveal_all=getattr(self, 'dealer_revealed', False),
+                card_back_path=self.card_back_svg,
+            )
 
-        if getattr(self, 'dealer_revealed', False):
-            dealer_paths = [translate(c) for c in getattr(self.dealer, 'hand', [])]
-        else:
-            # Show the back of the first card, rest face up
-            remaining = list(getattr(self.dealer, 'hand', []))[1:]
-            dealer_paths = [self.card_back_svg] + [translate(c) for c in remaining]
-
-        draw_hand(screen, dealer_paths, (10, top_margin), target_height=self.card_target_height, x_spacing=28)
-
-        # Player hand
-        if hasattr(self.player, 'get_translated_hand'):
-            player_paths = self.player.get_translated_hand()
-        else:
-            player_paths = []
-        draw_hand(
-            screen,
-            player_paths,
-            (10, screen.get_height() - bottom_margin - self.card_target_height),
-            target_height=self.card_target_height,
-            x_spacing=28,
-        )
+        # Player hand via class method
+        if hasattr(self.player, 'print_hand'):
+            self.player.print_hand(
+                screen=screen,
+                start_xy=(10, screen.get_height() - bottom_margin - self.card_target_height),
+                target_height=self.card_target_height,
+                x_spacing=28,
+            )
         self.draw_dx_overlay(screen, bottom_margin=bottom_margin)
 
     def _get_dx_info(self, screen, bottom_margin: int = 60):

@@ -360,9 +360,24 @@ class PyGamePlayer(Player):
     def extract_suit_name(unicode_char):
         return unicodedata.name(unicode_char).split()[1].lower() + 's'
 
-    def print_hand(self):
-        t_hand = self.get_translated_hand()
-        # TODO: draw the cards in the hand on the screen
+    def print_hand(self, screen=None, start_xy=(10, 10), target_height: int = 180, x_spacing: int = 28):
+        """Draw this player's hand to the provided pygame screen.
+
+        This uses the PNG card renderer to draw the player's current hand.
+        Public API mirrors prior draw_hand usage.
+        """
+        # Lazy import to avoid pygame dependency at module import time
+        try:
+            from PyGameBlackJack.card_renderer import draw_hand as _draw_hand
+        except Exception:
+            return  # If renderer cannot be imported, silently do nothing
+        try:
+            card_paths = self.get_translated_hand()
+            if screen is not None:
+                _draw_hand(screen, card_paths, start_xy, target_height=target_height, x_spacing=x_spacing)
+        except Exception:
+            # Fail-safe: don't let rendering issues crash gameplay
+            pass
 
     def get_translated_hand(self) -> List[Path]:
         return [self.translate_card(card) for card in self.hand]
@@ -388,7 +403,38 @@ class PyGamePlayer(Player):
 
 
 class PyGameDealer(Dealer, PyGamePlayer):
-    ...
+    def print_hand(self, screen=None, start_xy=(10, 10), target_height: int = 180, x_spacing: int = 28,
+                   reveal_all: bool = True, card_back_path: Path = None):
+        """Draw the dealer's hand, optionally hiding the first card.
+
+        Parameters:
+        - reveal_all: if False, the first card is drawn as a card back image.
+        - card_back_path: optional explicit path to the card back image; if not provided,
+          will try to use self.settings.card_back_location if available.
+        """
+        try:
+            from PyGameBlackJack.card_renderer import draw_hand as _draw_hand
+        except Exception:
+            return
+        try:
+            # Determine card back path
+            if not card_back_path:
+                try:
+                    card_back_path = Path(getattr(self.settings, 'card_back_location', ''))
+                except Exception:
+                    card_back_path = None
+
+            if reveal_all:
+                paths = [self.translate_card(c) for c in getattr(self, 'hand', [])]
+            else:
+                remaining = list(getattr(self, 'hand', []))[1:]
+                lead = [Path(card_back_path)] if card_back_path else []
+                paths = lead + [self.translate_card(c) for c in remaining]
+
+            if screen is not None:
+                _draw_hand(screen, paths, start_xy, target_height=target_height, x_spacing=x_spacing)
+        except Exception:
+            pass
 
 class PyGameDatabasePlayer(DatabasePlayer, PyGamePlayer):
     ...
