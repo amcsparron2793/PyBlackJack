@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 import unicodedata
 import random
@@ -71,7 +71,17 @@ class Player:
         exit(0)
 
     @staticmethod
-    def get_print_hand(hand) -> list:
+    def _get_card_tuple(card: Tuple[int, str]):
+        value, suit_name = card
+        card_tuple = [(fc.name.capitalize(), suit_name)
+                         for fc in FaceCard if fc.value == value]
+        if len(card_tuple) > 0:
+            card_tuple = card_tuple[0]
+        else:
+            card_tuple = (value, suit_name)
+        return card_tuple
+
+    def get_print_hand(self, hand) -> list:
         """
         Converts the numeric representation of card ranks in a hand to their corresponding name
         representation for better readability. Cards with rank identifiers 1, 11, 12, and 13 are
@@ -88,16 +98,7 @@ class Player:
         """
         p_hand = []
         for x in hand:
-            if x[0] == 1:
-                p_hand.append(('Ace', x[1]))
-            elif x[0] == 11:
-                p_hand.append(('Jack', x[1]))
-            elif x[0] == 12:
-                p_hand.append(('Queen', x[1]))
-            elif x[0] == 13:
-                p_hand.append(('King', x[1]))
-            else:
-                p_hand.append(x)
+            p_hand.append(self._get_card_tuple(x))
         return p_hand
 
     @property
@@ -388,16 +389,18 @@ class PyGamePlayer(Player):
     def get_translated_hand(self) -> List[Path]:
         return [self.translate_card(card) for card in self.hand]
 
+
+    def _get_card_tuple(self, card: Tuple[int, str]):
+        c_tuple = super()._get_card_tuple(card)
+        card_path_key = ' '.join((str(c_tuple[0]).lower(), c_tuple[1]))
+        return card_path_key
+
+
     def translate_card(self, card: tuple) -> Path:
-        """Translate a single card into its corresponding SVG path."""
+        """Translate a single card into its corresponding image path."""
         value, suit_unicode = card
         suit_name = self.extract_suit_name(suit_unicode)
-        card_path_key = f"{value} {suit_name}"
-        if card_path_key not in self.settings.card_svg_path_list:
-            card_path_key = [' '.join([fc.name.lower(), suit_name])
-                             for fc in FaceCard if fc.value == value][0]
-            if not card_path_key:
-                raise ValueError(f"Invalid card value: {value}")
+        card_path_key = self._get_card_tuple((value, suit_name))
         return self.settings.card_svg_path_list[card_path_key]
 
 
