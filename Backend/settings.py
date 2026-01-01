@@ -43,14 +43,14 @@ class PyGameSettings(Settings):
                             self.config.getint('PYGAME', 'screen_size_height'))
         self.font = font.Font(None, 36)
 
-        # Resolve card asset locations, preferring the project's SVG-cards-1.3 when available
+        # Resolve card asset locations, preferring the project's PNG-Cards when available
         cfg_dir = Path(self.config.get('PYGAME', 'card_dir_location'))
-        default_dir = PyBlackJackConfig.CARD_SVG_DEFAULT_PATH
+        default_dir = PyBlackJackConfig.CARD_PNG_DEFAULT_PATH
         # Pick configured directory if it exists; otherwise fall back to default
         self.card_dir_location = (cfg_dir if cfg_dir.exists() and cfg_dir.is_dir() else default_dir).resolve()
 
         cfg_back = Path(self.config.get('PYGAME', 'card_back_location'))
-        default_back = PyBlackJackConfig.CARD_BACK_SVG_DEFAULT_PATH
+        default_back = PyBlackJackConfig.CARD_BACK_PNG_DEFAULT_PATH
         # Pick configured back if it exists; otherwise fall back to default
         self.card_back_location = (cfg_back if cfg_back.exists() and cfg_back.is_file() else default_back).resolve()
 
@@ -59,17 +59,17 @@ class PyGameSettings(Settings):
                 return {
                     ' '.join(x.stem.split('_of_')): x.resolve()
                     for x in from_dir.iterdir()
-                    if x.suffix.lower() == '.svg'
+                    if x.suffix.lower() == '.png'
                     and not x.stem.endswith('2')
                     and not x.stem.endswith('_joker')
                 }
             except Exception:
                 return {}
 
-        self.card_svg_path_list = _build_map(self.card_dir_location)
+        self.card_image_path_list = _build_map(self.card_dir_location)
         # If the configured directory didn't yield any cards, try default path as a fallback
-        if not self.card_svg_path_list and default_dir.exists():
-            self.card_svg_path_list = _build_map(default_dir.resolve())
+        if not self.card_image_path_list and default_dir.exists():
+            self.card_image_path_list = _build_map(default_dir.resolve())
             self.card_dir_location = default_dir.resolve()
 
     @staticmethod
@@ -84,8 +84,11 @@ class PyBlackJackConfig(BetterConfigAJM):
     DEFAULT_DB_PATH = Path(Settings.GAME_ROOT_FOLDER, 'MiscProjectFiles/PyBlackJack.db')
     SETUP_DATABASE_SCRIPT_PATH = Path(Settings.GAME_ROOT_FOLDER, 'MiscProjectFiles/InitializeNewDB.sql')
     SETUP_NEW_PLAYER_SCRIPT_PATH = Path(Settings.GAME_ROOT_FOLDER, 'MiscProjectFiles/NewPlayerSetup.sql')
+
     CARD_SVG_DEFAULT_PATH = Path(Settings.GAME_ROOT_FOLDER, 'MiscProjectFiles/PlayingCards/SVG-cards-1.3')
-    CARD_BACK_SVG_DEFAULT_PATH = CARD_SVG_DEFAULT_PATH.parent / 'card_back.svg' #Path(Settings.GAME_ROOT_FOLDER, 'MiscProjectFiles/PlayingCards/card_back.svg')
+    CARD_PNG_DEFAULT_PATH = CARD_SVG_DEFAULT_PATH.parent / 'PNG-cards'
+    CARD_BACK_SVG_DEFAULT_PATH = CARD_SVG_DEFAULT_PATH.parent / 'card_back.svg'
+    CARD_BACK_PNG_DEFAULT_PATH = CARD_PNG_DEFAULT_PATH / 'card_back.png'
 
     DEFAULT_SCREEN_SIZE = (800, 600)
 
@@ -116,8 +119,8 @@ class PyBlackJackConfig(BetterConfigAJM):
                         'dx_font_color': PyGameSettings.GRAY_RGB,
                         'screen_size_width': PyBlackJackConfig.DEFAULT_SCREEN_SIZE[0],
                         'screen_size_height': PyBlackJackConfig.DEFAULT_SCREEN_SIZE[1],
-                        'card_dir_location': PyBlackJackConfig.CARD_SVG_DEFAULT_PATH,
-                        'card_back_location': PyBlackJackConfig.CARD_BACK_SVG_DEFAULT_PATH
+                        'card_dir_location': PyBlackJackConfig.CARD_PNG_DEFAULT_PATH,
+                        'card_back_location': PyBlackJackConfig.CARD_BACK_PNG_DEFAULT_PATH
                     }
              }
         ]

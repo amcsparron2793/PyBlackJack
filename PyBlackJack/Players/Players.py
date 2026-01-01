@@ -401,7 +401,7 @@ class PyGamePlayer(Player):
         value, suit_unicode = card
         suit_name = self.extract_suit_name(suit_unicode)
         card_path_key = self._get_card_tuple((value, suit_name))
-        return self.settings.card_svg_path_list[card_path_key]
+        return self.settings.card_image_path_list[card_path_key]
 
 
 class PyGameDealer(Dealer, PyGamePlayer):
