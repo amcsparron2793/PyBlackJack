@@ -57,22 +57,34 @@ class Cards:
         self.settings = kwargs.pop('settings', Settings())
         # noinspection PyTypeChecker
         self.card_back = kwargs.get('card_back', None)
+        self.suit = []
+        self.value = []
 
-        if self.settings.use_unicode_cards:
-            if self.card_back is None:
-                # three leading zeros made this code work
-                self.card_back = Cards.UNICODE_CARD_BACK
-            else:
-                self.card_back = self.card_back
-            self.suit = [x.value for x in CardSuits]
-        else:
-            self.card_back = Cards.PLAINTEXT_CARD_BACK
-            self.suit = [x.name for x in CardSuits]
+        self.setup_cards()
+
 
     # TODO: change this to have a value and suit property and rename it to Card?
     #  make self.suit and self.value into 'all suits' and 'all values', and make that part of Deck?
-        self.value = [x.value for x in CardValues]
 
+
+    def _setup_unicode_cardback_and_suit(self):
+        if self.card_back is None:
+            # three leading zeros made this code work
+            self.card_back = Cards.UNICODE_CARD_BACK
+        else:
+            self.card_back = self.card_back
+        self.suit = [x.value for x in CardSuits]
+
+    def _setup_plaintext_cardback_and_suit(self):
+        self.card_back = Cards.PLAINTEXT_CARD_BACK
+        self.suit = [x.name for x in CardSuits]
+
+    def setup_cards(self):
+        if self.settings.use_unicode_cards:
+            self._setup_unicode_cardback_and_suit()
+        else:
+            self._setup_plaintext_cardback_and_suit()
+        self.value = [x.value for x in CardValues]
 
 class Deck(Cards):
     """
