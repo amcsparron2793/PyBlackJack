@@ -4,7 +4,7 @@ PyBlackJack
 """
 
 import pygame
-from PyGameBlackJack import GameStates
+from Backend.enum import GameStates
 from PyGameBlackJack.GameScreens import StartScreen, GameOverScreen, GameScreen
 from os import system
 from Backend.settings import Settings, PyGameSettings
