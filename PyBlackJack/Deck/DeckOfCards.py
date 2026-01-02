@@ -96,6 +96,14 @@ class Deck(Cards):
         super().__init__(**kwargs)
         self.deck = list(itertools.product(self.value, self.suit))
 
+    @property
+    def is_running_low(self):
+        return len(self.deck) <= self.shoe_runout_warning_threshold
+
+    @property
+    def is_empty(self):
+        return len(self.deck) <= 0
+
 
     def shuffle_deck(self):
         """
@@ -123,9 +131,9 @@ class Deck(Cards):
         :raises EmptyShoeError: If the deck has run out of cards.
         :return: The top card of the deck.
         """
-        if len(self.deck) <= self.shoe_runout_warning_threshold:
+        if self.is_running_low:
             print(f"{len(self.deck)} cards left to draw from.")
-        if len(self.deck) <= 0:
+        if self.is_empty:
             raise EmptyShoeError("Deck has run out of cards")
         else:
             return self.deck.pop(0)
