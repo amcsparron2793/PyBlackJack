@@ -278,6 +278,14 @@ class Game:
         self.end_hand()
         return player
 
+    @staticmethod
+    def get_winner_string(winner):
+        return f"{winner} Wins!!!!!!!!"
+
+    def _print_and_award_winner(self, player: Player):
+        print(self.get_winner_string(player.player_display_name))
+        self.banker.award_hand_value(player)
+
     def display_winner(self):
         """
         Determines the winner of the game by comparing the hand values of the player and
@@ -291,21 +299,14 @@ class Game:
 
         :return: None
         """
-        if self.player.busted:
-            print(f"{self.dealer.player_display_name} Wins!!!!!!!!")
-            self.banker.award_hand_value(self.dealer)
+        dealer_win = self.player.busted or (self.player.get_hand_value() < self.dealer.get_hand_value())
+        player_win = self.dealer.busted or (self.player.get_hand_value() > self.dealer.get_hand_value())
 
-        elif self.dealer.busted:
-            print(f"Player {self.player.player_display_name} Wins!!!!!!!")
-            self.banker.award_hand_value(self.player)
+        if dealer_win:
+            self._print_and_award_winner(self.dealer)
 
-        elif self.player.get_hand_value() < self.dealer.get_hand_value():
-            print(f"{self.dealer.player_display_name} Wins!!!!!!!!")
-            self.banker.award_hand_value(self.dealer)
-
-        elif self.player.get_hand_value() > self.dealer.get_hand_value():
-            print(f"Player {self.player.player_display_name} Wins!!!!!!!")
-            self.banker.award_hand_value(self.player)
+        elif player_win:
+            self._print_and_award_winner(self.player)
 
     def setup_new_hand(self):
         """
