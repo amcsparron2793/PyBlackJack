@@ -70,8 +70,8 @@ class Player:
         system("pause")
         exit(0)
 
-    @staticmethod
-    def _get_card_tuple(card: Tuple[int, str]):
+
+    def _get_card_tuple(self, card: Tuple[int, str]):
         value, suit_name = card
         card_tuple = [(fc.name.capitalize(), suit_name)
                          for fc in FaceCard if fc.value == value]
@@ -178,6 +178,11 @@ class Dealer(Player):
         super().__init__(player_chips)
         self.hidden_hand = []
         self.chosen_card_back = chosen_card_back
+
+    def _get_card_tuple(self, card: Tuple[int, str]):
+        if card == self.chosen_card_back:
+            return card
+        return super()._get_card_tuple(card)
 
     def print_hand(self):
         """
