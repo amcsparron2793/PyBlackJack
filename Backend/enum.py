@@ -1,5 +1,9 @@
 from enum import Enum
 
+class TurnChoices(Enum):
+    HIT = 1
+    STAY = 2
+
 class FaceCard(Enum):
     ACE = 1
     JACK = 11

@@ -248,6 +248,7 @@ class Game:
         choices = {1: 'Hit',
                    2: 'Stay'}
 
+        # TODO: redo with enum TurnChoices
         pretty_choices = [(x, y) for x, y in [x for x in choices.items()]]
         while True:
             c = input(f"Would you like to \n{pretty_choices[0][0]}. {pretty_choices[0][1]}"
