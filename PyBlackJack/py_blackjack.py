@@ -5,7 +5,7 @@ PyBlackJack
 
 import pygame
 from Backend.enum import GameStates
-from PyGameBlackJack.GameScreens import StartScreen, GameOverScreen, GameScreen
+from PyGameBlackJack.game_screens import StartScreen, GameOverScreen, GameScreen
 from os import system
 from Backend.settings import Settings, PyGameSettings
 from Deck.DeckOfCards import Deck, CardSuits
