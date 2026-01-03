@@ -81,6 +81,13 @@ class Player:
             card_tuple = (value, suit_name)
         return card_tuple
 
+    @staticmethod
+    def _validate_card_tuple(card_tup: Tuple[str, str]):
+        if len(card_tup) == 2:
+            card_str = f"{card_tup[0]} {card_tup[1]}"
+            return card_str
+        return card_tup
+
     def get_print_hand(self, hand) -> list:
         """
         Converts the numeric representation of card ranks in a hand to their corresponding name
@@ -98,7 +105,8 @@ class Player:
         """
         p_hand = []
         for x in hand:
-            p_hand.append(self._get_card_tuple(x))
+            card_tup = self._get_card_tuple(x)
+            p_hand.append(self._validate_card_tuple(card_tup))
         return p_hand
 
     @property
