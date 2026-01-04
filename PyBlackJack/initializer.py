@@ -1,4 +1,5 @@
 from Backend.PlayerCashRecordDB import PyBlackJackSQLLite
+from Backend.enum import CardSuits
 from Backend.settings import Settings
 from PyBlackJack.Bank.Cage import Cage, DatabaseCage
 from PyBlackJack.Deck.DeckOfCards import Deck
@@ -27,6 +28,34 @@ class BlackJackInitializer:
         self.player_id = kwargs.get('player_id', None)
 
         self.initialize_game(**kwargs)
+
+    @classmethod
+    def get_welcome_message(cls, **kwargs):
+        return f"{cls._get_suits_string(**kwargs)} Welcome to PyBlackJack! {cls._get_suits_string(**kwargs)}"
+
+    @classmethod
+    def _get_suits_string(cls, **kwargs):
+        """
+        Generates a string representation of card suits based on the game settings.
+
+        This method checks the game settings to determine whether Unicode card symbols
+        should be used. If so, it constructs a string containing all Unicode card suit
+        symbols, separated by spaces. If Unicode symbols are not used, an empty string
+        is returned.
+
+        :return: A string of card suits based on the game settings.
+        :rtype: str
+        """
+        use_unicode_cards = kwargs.get('use_unicode_cards', True)
+        if use_unicode_cards:
+            suits = [x.value for x in CardSuits]
+        else:
+            suits = ''
+        suits_string = ''
+
+        for x in suits:
+            suits_string += f"{x} "
+        return suits_string
 
     def _shared_initialization(self, **kwargs):
         self.game_deck = Deck(settings=self.game_settings)

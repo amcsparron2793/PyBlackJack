@@ -54,27 +54,6 @@ class Game(BlackJackInitializer):
             print("Ok Quitting")
             exit(-1)
 
-    def _get_suits_string(self):
-        """
-        Generates a string representation of card suits based on the game settings.
-
-        This method checks the game settings to determine whether Unicode card symbols
-        should be used. If so, it constructs a string containing all Unicode card suit
-        symbols, separated by spaces. If Unicode symbols are not used, an empty string
-        is returned.
-
-        :return: A string of card suits based on the game settings.
-        :rtype: str
-        """
-        if self.game_settings.use_unicode_cards:
-            suits = [x.value for x in CardSuits]
-        else:
-            suits = ''
-        suits_string = ''
-
-        for x in suits:
-            suits_string += f"{x} "
-        return suits_string
 
     def _start_screen(self):
         """
@@ -89,7 +68,7 @@ class Game(BlackJackInitializer):
         """
         while True:
             system('cls')
-            print(f"{self._get_suits_string() * 4} Welcome to PyBlackJack! {self._get_suits_string() * 4}")
+            print(self.get_welcome_message())
             try:
                 if yes_no("Ready to play?"):
                     system('cls')
@@ -223,6 +202,22 @@ class Game(BlackJackInitializer):
         print(self.get_winner_string(player.player_display_name))
         self.banker.award_hand_value(player)
 
+    def _calculate_winner(self):
+        dealer_high = (self.player.get_hand_value() < self.dealer.get_hand_value())
+        player_high = (self.player.get_hand_value() > self.dealer.get_hand_value())
+        tie = (self.player.get_hand_value() == self.dealer.get_hand_value())
+
+        if self.dealer.busted:
+            player_win = True
+            dealer_win = False
+        elif self.player.busted:
+            dealer_win = True
+            player_win = False
+        else:
+            player_win = player_high or tie
+            dealer_win = dealer_high
+        return player_win, dealer_win
+
     def display_winner(self):
         """
         Determines the winner of the game by comparing the hand values of the player and
@@ -236,12 +231,7 @@ class Game(BlackJackInitializer):
 
         :return: None
         """
-        dealer_high = (self.player.get_hand_value() < self.dealer.get_hand_value())
-        player_high = (self.player.get_hand_value() > self.dealer.get_hand_value())
-        tie = (self.player.get_hand_value() == self.dealer.get_hand_value())
-
-        dealer_win = self.player.busted or dealer_high
-        player_win = self.dealer.busted or player_high or tie
+        player_win, dealer_win = self._calculate_winner()
 
         if dealer_win:
             self._print_and_award_winner(self.dealer)

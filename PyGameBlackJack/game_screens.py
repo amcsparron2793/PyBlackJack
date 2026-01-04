@@ -1,5 +1,6 @@
 from pathlib import Path
 from PyGameBlackJack.card_renderer import get_renderer_status
+from PyBlackJack.initializer import BlackJackInitializer
 
 class StartScreen:
     WELCOME_MSG = "Welcome to PyBlackJack!"
@@ -11,8 +12,8 @@ class StartScreen:
         self.screen = screen
         self.game_settings = game_settings
         self.edge_buffer_pixels = 10
-
-        self.title_surface = self.game_settings.font.render(self.__class__.WELCOME_MSG, True,
+        title_text = BlackJackInitializer.get_welcome_message(use_unicode_cards=False)
+        self.title_surface = self.game_settings.font.render(title_text, True,
                                                             self.game_settings.game_font_color)
         self.instruction_surface = self.game_settings.font.render(self.__class__.START_SCREEN_INSTRUCTIONS, True,
                                                                   self.game_settings.game_font_color)
