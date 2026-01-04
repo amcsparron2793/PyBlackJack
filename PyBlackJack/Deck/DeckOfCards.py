@@ -26,7 +26,7 @@ class EmptyShoeError(BaseException):
         return self
 
 
-class Cards:
+class _Card:
     """
     Represents a deck of playing cards with support for Unicode and plaintext representations.
 
@@ -53,30 +53,57 @@ class Cards:
     UNICODE_CARD_BACK = '\U0001F0A0'
     PLAINTEXT_CARD_BACK = 'xxxx'
 
-    def __init__(self, ** kwargs):#, use_unicode=True, card_back: str = None):
+    def __init__(self, suit, value, ** kwargs):#, use_unicode=True, card_back: str = None):
         self.settings = kwargs.pop('settings', Settings())
+        self._card_suit = None
+        self._card_value = None
+
         # noinspection PyTypeChecker
         self.card_back = kwargs.get('card_back', None)
-        self.suit = []
-        self.value = []
+        self.card_suit = suit
+        self.card_value = value
+
 
         self.setup_cards()
 
 
-    # TODO: change this to have a value and suit property and rename it to Card?
-    #  make self.suit and self.value into 'all suits' and 'all values', and make that part of Deck?
+    # TODO: MAKE A _PYGAMECARD CLASS GIVE THIS A PNGFILEPATH property
 
+    def __str__(self):
+        return f"{self.card_value.name} of {self.card_suit.name}S"
+
+    @property
+    def card_suit(self):
+        return self._card_suit
+
+    @card_suit.setter
+    def card_suit(self, suit:CardSuits):
+        if isinstance(suit, CardSuits):
+            self._card_suit = suit
+        else:
+            raise AttributeError(f"Suit must be a CardSuits enum value. NOT \'{type(suit)}\'")
+
+    @property
+    def card_value(self):
+        return self._card_value
+
+    @card_value.setter
+    def card_value(self, value:CardValues):
+        if isinstance(value, CardValues):
+            self._card_value = value
+        else:
+            raise AttributeError("Value must be a CardValues enum value.")
 
     def _setup_unicode_cardback_and_suit(self):
         if self.card_back is None:
             # three leading zeros made this code work
-            self.card_back = Cards.UNICODE_CARD_BACK
+            self.card_back = self.__class__.UNICODE_CARD_BACK
         else:
             self.card_back = self.card_back
-        self.suit = [x.value for x in CardSuits]
+        #self.suit = [x.value for x in CardSuits]
 
     def _setup_plaintext_cardback_and_suit(self):
-        self.card_back = Cards.PLAINTEXT_CARD_BACK
+        self.card_back = self.__class__.PLAINTEXT_CARD_BACK
         self.suit = [x.name for x in CardSuits]
 
     def setup_cards(self):
@@ -84,9 +111,9 @@ class Cards:
             self._setup_unicode_cardback_and_suit()
         else:
             self._setup_plaintext_cardback_and_suit()
-        self.value = [x.value for x in CardValues]
+        #self.value = [x.value for x in CardValues]
 
-class Deck(Cards):
+class Deck:
     """
     Represents a standard deck of cards.
 
@@ -106,7 +133,12 @@ class Deck(Cards):
                                                         self.settings.shoe_runout_warning_threshold)
                                                         #Deck.DEFAULT_SHOE_RUNOUT_WARNING_THRESHOLD)
         super().__init__(**kwargs)
-        self.deck = list(itertools.product(self.value, self.suit))
+        self.deck = []
+        self._populate_deck(**kwargs)
+
+
+        self.card_back = self.deck[0].card_back
+        # self.deck = list(itertools.product(self.value, self.suit))
 
     @property
     def is_running_low(self):
@@ -116,6 +148,16 @@ class Deck(Cards):
     def is_empty(self):
         return len(self.deck) <= 0
 
+    def print_as_populating(self, card: _Card):
+        # TODO: make this flashy - alternate blackish with red?
+        print(card)
+
+    def _populate_deck(self, **kwargs):
+        while len(self.deck) < 52:
+            for card_val, card_suit in itertools.product(CardValues, CardSuits):
+                card = _Card(suit=card_suit, value=card_val, **kwargs)
+                self.print_as_populating(card)
+                self.deck.append(card)
 
     def shuffle_deck(self):
         """

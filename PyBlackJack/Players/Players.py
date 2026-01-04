@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, TYPE_CHECKING
 
 import unicodedata
 import random
@@ -8,7 +8,11 @@ from os import system
 from Backend import yes_no
 from Backend.settings import Settings, PyGameSettings
 from Backend.PlayerCashRecordDB import PyBlackJackSQLLite, PlayerDoesNotExistError
-from Backend.enum import FaceCard
+from Backend.enum import FaceCard, CardValues
+
+if TYPE_CHECKING:
+    from PyBlackJack.Deck.DeckOfCards import _Card
+
 
 class Player:
     """
@@ -71,8 +75,8 @@ class Player:
         exit(0)
 
 
-    def _get_card_tuple(self, card: Tuple[int, str]):
-        value, suit_name = card
+    def _get_card_tuple(self, card: '_Card'):
+        value, suit_name = card.card_value, card.card_suit
         card_tuple = [(fc.name.capitalize(), suit_name)
                          for fc in FaceCard if fc.value == value]
         if len(card_tuple) > 0:
@@ -82,9 +86,12 @@ class Player:
         return card_tuple
 
     @staticmethod
-    def _validate_card_tuple(card_tup: Tuple[str, str]):
+    def _validate_card_tuple(card_tup: Tuple[CardValues, CardValues]):
         if len(card_tup) == 2:
-            card_str = f"{card_tup[0]} {card_tup[1]}"
+            if card_tup[0].value > 10:
+                card_str = f"{card_tup[0].name} {card_tup[1].value}"
+            else:
+                card_str = f"{card_tup[0].value} {card_tup[1].value}"
             return card_str
         return card_tup
 
@@ -170,10 +177,10 @@ class Player:
         """
         value = []
         for c in self.hand:
-            if c[0] >= 11:
+            if c.card_value.value >= 11:
                 value.append(10)
             else:
-                value.append(c[0])
+                value.append(c.card_value.value)
 
         value = self._ace_eval(value)
         return sum(value)
