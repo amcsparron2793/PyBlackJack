@@ -3,19 +3,17 @@
 PyBlackJack
 """
 
-import pygame
-from Backend.enum import GameStates
-from PyGameBlackJack.game_screens import StartScreen, GameOverScreen, GameScreen
 from os import system
-from Backend.settings import Settings, PyGameSettings
-from Deck.DeckOfCards import Deck, CardSuits
-from Players.Players import Player, Dealer, DatabasePlayer, PyGamePlayer, PyGameDatabasePlayer, PyGameDealer
-from Bank.Cage import Cage, DatabaseCage
+from Backend.settings import Settings
+from PyBlackJack.Deck.DeckOfCards import Deck, CardSuits
+from PyBlackJack.Players.Players import Player, Dealer, DatabasePlayer
+from PyBlackJack.Bank.Cage import Cage, DatabaseCage
 from Backend import yes_no
 from Backend.PlayerCashRecordDB import PyBlackJackSQLLite
+from PyBlackJack.initializer import BlackJackInitializer
 
 
-class Game:
+class Game(BlackJackInitializer):
     """
     Game class for managing and executing a blackjack game.
 
@@ -37,69 +35,6 @@ class Game:
     :ivar game_settings: The configuration and settings for the game.
     :type game_settings: Settings
     """
-    def __init__(self, **kwargs):
-        self.banker = None
-        self.player = None
-        self.db = None
-        self.dealer = None
-        self.game_deck = None
-
-        self.game_settings = kwargs.get('game_settings', Settings())
-
-        self._initialize_game(**kwargs)
-
-
-    def _initialize_game(self, **kwargs):
-        """
-        Initializes the game by setting up the necessary components such as deck,
-        player, dealer, and banker. It handles both database-enabled and non-database
-        scenarios based on the provided keyword arguments.
-
-        :param kwargs: Optional keyword arguments to customize game initialization:
-            - ``use_database`` (bool): Indicates if the game should use a database. Defaults to the
-              value defined in game_settings.
-            - ``player_name`` (str): The player's name. Defaults to the value defined in game_settings.
-            - ``player_id`` (Optional[int]): The player's unique identifier. Defaults to None.
-            - ``db`` (Optional[object]): The database instance if a custom database should be used.
-              Required if ``use_database`` is True.
-        :return: None
-        """
-        self.use_database = kwargs.get('use_database', self.game_settings.use_database)
-        self.player_name = kwargs.get('player_name', self.game_settings.player_name)
-        self.player_id = kwargs.get('player_id', None)
-        self.game_deck = Deck(settings=self.game_settings)
-        self.game_deck.shuffle_deck()
-
-        if not self.use_database:
-            if issubclass(self.__class__, PyGameBlackJack):
-                self.player = PyGamePlayer(settings=self.game_settings)
-            else:
-                self.player = Player(settings=self.game_settings)
-                self.dealer = Dealer(chosen_card_back=self.game_deck.card_back)
-
-            self.banker = Cage(settings=self.game_settings)
-
-        elif self.use_database:
-            self.db = kwargs.get('db', PyBlackJackSQLLite(settings=self.game_settings))
-
-            if issubclass(self.__class__, PyGameBlackJack):
-                self.player = PyGameDatabasePlayer(player_id=self.player_id,
-                                                   player_name=self.player_name,
-                                                   settings=self.game_settings)
-
-            else:
-                self.player = DatabasePlayer(player_id=self.player_id,
-                                             player_name=self.player_name,
-                                             settings=self.game_settings)
-
-            self.banker = DatabaseCage(self.db, settings=self.game_settings)
-        if issubclass(self.__class__, PyGameBlackJack):
-            self.dealer = PyGameDealer(chosen_card_back=self.game_deck.card_back)
-        else:
-            self.dealer = Dealer(chosen_card_back=self.game_deck.card_back)
-        # initialize player chips and dealer chips
-        self.banker.pay_in(self.player)
-        self.banker.pay_in(self.dealer)
 
     def play(self):
         """
@@ -113,6 +48,7 @@ class Game:
         :raises KeyboardInterrupt: When the user interrupts the application manually.
         """
         try:
+            self._start_screen()
             self.hand_loop()
         except KeyboardInterrupt:
             print("Ok Quitting")
@@ -300,8 +236,12 @@ class Game:
 
         :return: None
         """
-        dealer_win = self.player.busted or (self.player.get_hand_value() < self.dealer.get_hand_value())
-        player_win = self.dealer.busted or (self.player.get_hand_value() > self.dealer.get_hand_value())
+        dealer_high = (self.player.get_hand_value() < self.dealer.get_hand_value())
+        player_high = (self.player.get_hand_value() > self.dealer.get_hand_value())
+        tie = (self.player.get_hand_value() == self.dealer.get_hand_value())
+
+        dealer_win = self.player.busted or dealer_high
+        player_win = self.dealer.busted or player_high or tie
 
         if dealer_win:
             self._print_and_award_winner(self.dealer)
@@ -445,157 +385,6 @@ class Game:
         player.bet_amount = bet_amount
         player = self.banker.take_bet(player)
         return player
-
-
-class PyGameBlackJack(Game):
-    def __init__(self, **kwargs):
-        raise NotImplementedError("PyGameBlackJack is not yet implemented. Please use PyBlackJack instead.")
-        pygame.init()
-        self.game_settings = kwargs.pop('game_settings', PyGameSettings())
-        super().__init__(game_settings=self.game_settings, **kwargs)
-
-        pygame.display.set_caption("PyBlackJack")
-
-        self.screen = pygame.display.set_mode(size=self.game_settings.screen_size)
-        self.clock = pygame.time.Clock()
-
-        self.running = True
-
-        self._state = GameStates.START  # Game states: START, PLAYING, GAME_OVER
-        self.start_screen = StartScreen(self.game_settings, screen=self.screen)
-        self.game_over_screen = GameOverScreen(self.game_settings, screen=self.screen)
-        self.game_screen = GameScreen(self.game_settings, screen=self.screen,
-                                      player=self.player, dealer=self.dealer)
-
-        # ensure GameScreen references current player/dealer after re-init
-        self.game_screen.player = self.player
-        self.game_screen.dealer = self.dealer
-        self.game_screen.dealer_revealed = False
-        self.player.print_hand()
-
-
-    @property
-    def state(self):
-        return self._state
-
-    @state.setter
-    def state(self, value):
-        if value in GameStates:
-            self._state = value
-        else:
-            raise ValueError(f"Invalid game state: {value}")
-
-    def _keydown_events(self, event):
-        if event.key == pygame.K_SPACE:
-            # Reserved for future use (e.g., animations)
-            pass
-        elif event.key == pygame.K_ESCAPE:
-            self.state = GameStates.GAME_OVER
-        elif event.key == pygame.K_h:  # Player hits
-            self.hit(self.player)
-        elif event.key == pygame.K_s:  # Player stays
-            self.stay(self.player)
-        # TODO: finish/dont use this?
-        elif event.key == pygame.K_r:  # Reveal dealer hand toggle
-            if hasattr(self.game_screen, 'dealer_revealed'):
-                self.game_screen.dealer_revealed = not self.game_screen.dealer_revealed
-        elif event.key == pygame.K_n:  # New hand
-            self.setup_new_hand()
-            if hasattr(self.game_screen, 'dealer_revealed'):
-                self.game_screen.dealer_revealed = False
-
-    def check_events(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.running = False
-                self.state = GameStates.GAME_OVER
-            elif event.type == pygame.KEYDOWN:
-                self._keydown_events(event)
-
-    def _start_screen(self):
-        """
-        Render the start screen.
-        """
-        self.start_screen.draw(self.screen)
-        pygame.display.flip()  # Update the screen
-
-        # Wait for the player to press any key to continue
-        self._wait_for_key()
-
-    def _wait_for_key(self):
-        """
-        Wait for a key press to continue.
-        """
-        waiting = True
-        while waiting:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
-                    waiting = False
-                if event.type == pygame.KEYDOWN:
-                    waiting = False
-
-    def play(self):
-        """
-        Main game loop.
-        """
-        while self.running:
-            # Handle game states
-            if self.state == GameStates.START:
-                self._start_screen()
-                self.state = GameStates.PLAYING  # Transition to the playing state
-
-            elif self.state == GameStates.PLAYING:
-                self.setup_new_hand()
-                self._game_loop()
-
-            elif self.state == GameStates.GAME_OVER:
-                self._game_over_screen()
-                self.running = False  # Exit loop after displaying game over
-
-        self._quit_game()
-
-    def _game_loop(self):
-        """
-        The main game-playing loop.
-        """
-        while self.state == GameStates.PLAYING:
-            # Event handling
-            self.check_events()
-
-            # TODO: Update game logic
-            #  Add functionality such as checking for a bust, dealer actions, etc.
-            # Render game screen
-            self._render_game_screen()
-
-            # Limit frame rate to 60 FPS
-            self.clock.tick(60)
-
-    def _render_game_screen(self):
-        """
-        Render the main game playing screen.
-        """
-        self.game_screen.draw(self.screen)
-        pygame.display.flip()  # Update the display
-
-    def _game_over_screen(self):
-        """
-        Display the game over screen.
-        """
-        self.game_over_screen.draw(self.screen)
-        pygame.display.flip()  # Update the screen
-
-        # Wait for the player to press any key to continue
-        self._wait_for_key()
-
-    def _quit_game(self):
-        """
-        Properly shut down the game.
-        """
-        pygame.quit()
-        exit()
-
-
 
 
 if __name__ == '__main__':

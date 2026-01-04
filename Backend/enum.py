@@ -4,6 +4,9 @@ class TurnChoices(Enum):
     HIT = 1
     STAY = 2
 
+    def __str__(self):
+        return self.name
+
 class FaceCard(Enum):
     ACE = 1
     JACK = 11
