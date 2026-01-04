@@ -127,7 +127,7 @@ class Player:
         else:
             return "Dealer"
 
-    def get_hand_value_string(self):
+    def get_hand_total_value_string(self):
         return f"(total: {self.get_hand_value()})"
 
     def print_hand(self):
@@ -141,7 +141,7 @@ class Player:
         :return: None
         """
         print_hand = self.get_print_hand(self.hand)
-        print(f"Player {self.player_display_name}: {print_hand} {self.get_hand_value_string()}")
+        print(f"Player {self.player_display_name}: {print_hand} {self.get_hand_total_value_string()}")
 
     @staticmethod
     def _ace_eval(value_list: list):
@@ -255,7 +255,7 @@ class Dealer(Player):
         :rtype: NoneType
         """
         print_hand = self.get_print_hand(self.hand)
-        print(f"{self.player_display_name}: {print_hand} {self.get_hand_value_string()}")
+        print(f"{self.player_display_name}: {print_hand} {self.get_hand_total_value_string()}")
 
     def should_stay(self):
         """
